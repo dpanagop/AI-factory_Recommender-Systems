@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recommender Systems - Interactive Study Guide</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        accent: {
+                            500: '#f59e0b',
+                            600: '#d97706',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- MathJax for rendering formulas -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        /* Custom 3D Flip Card Styles */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        .transform-style-3d {
+            transform-style: preserve-3d;
+        }
+        .backface-hidden {
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .dark ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-full flex flex-col font-sans transition-colors duration-200">
+
+    <!-- Header & Navigation -->
+    <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col md:flex-row items-center justify-between gap-4">
+            <!-- Title & Institution Info -->
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-brand-500 text-white rounded-lg shadow-md">
+                    <i class="fa-solid me-0 fa-film text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+                        Recommender Systems
+                        <span class="text-xs font-semibold px-2 py-0.5 rounded bg-brand-100 dark:bg-brand-900/60 text-brand-700 dark:text-brand-300">Lecture 1</span>
+                    </h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">
+                        AUEB AI Data Factory • Dr. Dimitrios Panagopoulos • <a href="https://dpanagopoulos.com/"> for more info visit my site</a>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Progress Dashboard Bar -->
+            <div class="flex items-center gap-6 w-full md:w-auto justify-between md:justify-end">
+                <div class="flex items-center gap-4 text-xs">
+                    <!-- Flashcard Progress -->
+                    <div class="flex flex-col">
+                        <span class="text-slate-500 dark:text-slate-400 font-medium">Flashcards Mastered</span>
+                        <div class="flex items-center gap-2">
+                            <div class="w-24 bg-slate-200 dark:bg-slate-700 rounded-full h-2 overflow-hidden">
+                                <div id="flashcard-progress-bar" class="bg-emerald-500 h-full transition-all duration-300" style="width: 0%"></div>
+                            </div>
+                            <span id="flashcard-progress-text" class="font-bold text-slate-700 dark:text-slate-200">0/10</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Quiz Progress -->
+                    <div class="flex flex-col">
+                        <span class="text-slate-500 dark:text-slate-400 font-medium">Quiz Score</span>
+                        <div class="flex items-center gap-2">
+                            <span id="quiz-score-badge" class="font-bold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
+                                Unattempted
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dark Mode Toggle -->
+                <button id="theme-toggle" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors" title="Toggle Theme">
+                    <i id="theme-toggle-icon" class="fa-solid fa-moon"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-slate-100 dark:border-slate-700/50">
+            <nav class="flex space-x-8 overflow-x-auto py-2 text-sm font-medium">
+                <button onclick="switchTab('lecture-summary')" id="tab-lecture-summary" class="tab-btn px-3 py-2 rounded-md text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-900/30 whitespace-nowrap flex items-center gap-2">
+                    <i class="fa-solid fa-book-open"></i> Key Concepts & Notes
+                </button>
+                <button onclick="switchTab('flashcards')" id="tab-flashcards" class="tab-btn px-3 py-2 rounded-md text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white whitespace-nowrap flex items-center gap-2">
+                    <i class="fa-solid fa-clone"></i> Flashcard Deck
+                </button>
+                <button onclick="switchTab('quiz')" id="tab-quiz" class="tab-btn px-3 py-2 rounded-md text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white whitespace-nowrap flex items-center gap-2">
+                    <i class="fa-solid fa-circle-question"></i> Knowledge Quiz
+                </button>
+                <button onclick="switchTab('movielens-lab')" id="tab-movielens-lab" class="tab-btn px-3 py-2 rounded-md text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white whitespace-nowrap flex items-center gap-2">
+                    <i class="fa-solid fa-database"></i> MovieLens 10M EDA Lab
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- TAB 1: LECTURE SUMMARY & KEY CONCEPTS -->
+        <section id="content-lecture-summary" class="tab-content space-y-6">
+            <!-- Hero Banner -->
+            <div class="bg-gradient-to-r from-brand-700 via-brand-600 to-indigo-700 text-white rounded-2xl p-6 md:p-8 shadow-lg">
+                <div class="max-w-3xl">
+                    <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight mb-2">
+                        Lecture 1: Introduction to Recommender Systems
+                    </h2>
+                    <p class="text-brand-100 text-sm md:text-base leading-relaxed">
+                        Comprehensive summary of foundational concepts, real-world case studies (Netflix Prize), data architectures (MovieLens 10M), and critical practical bottlenecks like the Cold Start Problem.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Key Modules Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                <!-- Card 1: Core Definition & Enterprise Impact -->
+                <div class="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 flex items-center gap-0 justify-center mb-4">
+                        <i class="fa-solid fa-chart-line text-lg"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">1. What is a Recommender System?</h3>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
+                        Systems designed to predict user ratings or implicit preferences for items. They form an integral part of modern digital business models:
+                    </p>
+                    <ul class="text-xs space-y-2 text-slate-600 dark:text-slate-400">
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-check text-emerald-500 mt-0.5"></i>
+                            <span><strong>Amazon:</strong> Generates ~35% of total revenue via recommendation modules.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-check text-emerald-500 mt-0.5"></i>
+                            <span><strong>Netflix:</strong> ~75% of content watched originates directly from recommendations.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-check text-emerald-500 mt-0.5"></i>
+                            <span><strong>Other Ecosystems:</strong> Google Search results, Facebook Timeline, Spotify Daily Mixes.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Card 2: The Netflix Prize Case Study -->
+                <div class="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="w-10 h-10 rounded-lg bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-400 flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-trophy text-lg"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">2. The Netflix Prize (2006–2009)</h3>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-3">
+                        A $1 Million competition to improve Netflix's movie rating prediction accuracy (RMSE) by 10%.
+                    </p>
+                    <div class="bg-slate-50 dark:bg-slate-900/60 p-3 rounded-lg border border-slate-100 dark:border-slate-700/50 text-xs space-y-1.5">
+                        <p class="text-slate-700 dark:text-slate-300"><strong>Winner:</strong> <em>BellKor's Pragmatic Chaos</em> (2009) with a 10.06% improvement.</p>
+                        <p class="text-slate-700 dark:text-slate-300"><strong>First Progress Prize:</strong> Korbell team achieved 8.43% improvement after 2,000+ engineering hours combining <strong>107 algorithms</strong>.</p>
+                    </div>
+                </div>
+
+                <!-- Card 3: System vs. Algorithm -->
+                <div class="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400 flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-gears text-lg"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">3. "More Than Just an Algorithm"</h3>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-3">
+                        Why Netflix didn't fully implement the winning algorithm in production:
+                    </p>
+                    <ul class="text-xs space-y-2 text-slate-600 dark:text-slate-400">
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-triangle-exclamation text-amber-500 mt-0.5"></i>
+                            <span><strong>Engineering Complexity & Scaling:</strong> The offline model was built for 100M static ratings, while Netflix scaled to 5B+ dynamic interactions.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-arrows-split-up-and-left text-brand-500 mt-0.5"></i>
+                            <span><strong>Holistic Evaluation:</strong> Rating prediction accuracy is only one component. Real systems must optimize for <em>Context, Title Popularity, Novelty, Diversity, Evidence, and Freshness.</em></span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Card 4: MovieLens 10M Dataset -->
+                <div class="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-server text-lg"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">4. MovieLens 10M Benchmark</h3>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-3">
+                        Created by GroupLens (University of Minnesota, Twin Cities - Harper & Konstan).
+                    </p>
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div class="bg-slate-50 dark:bg-slate-700/50 p-2 rounded">
+                            <span class="block font-semibold text-slate-900 dark:text-white">10,000,054</span>
+                            <span class="text-slate-500 dark:text-slate-400">Ratings</span>
+                        </div>
+                        <div class="bg-slate-50 dark:bg-slate-700/50 p-2 rounded">
+                            <span class="block font-semibold text-slate-900 dark:text-white">95,580</span>
+                            <span class="text-slate-500 dark:text-slate-400">Applied Tags</span>
+                        </div>
+                        <div class="bg-slate-50 dark:bg-slate-700/50 p-2 rounded">
+                            <span class="block font-semibold text-slate-900 dark:text-white">10,681</span>
+                            <span class="text-slate-500 dark:text-slate-400">Movies</span>
+                        </div>
+                        <div class="bg-slate-50 dark:bg-slate-700/50 p-2 rounded">
+                            <span class="block font-semibold text-slate-900 dark:text-white">71,567</span>
+                            <span class="text-slate-500 dark:text-slate-400">Users</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 5: File Formats & Schema -->
+                <div class="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-file-code text-lg"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">5. Data Schema (`::` Separator)</h3>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-3">
+                        MovieLens 10M uses standard `.dat` plain-text files delimited by double colons (`::`):
+                    </p>
+                    <div class="font-mono text-xs bg-slate-900 text-slate-200 p-3 rounded-lg space-y-1.5 overflow-x-auto">
+                        <p><span class="text-amber-400">ratings.dat:</span> UserID::MovieID::Rating::Timestamp</p>
+                        <p><span class="text-amber-400">movies.dat:</span> MovieID::Title::Genres</p>
+                        <p><span class="text-amber-400">tags.dat:</span> UserID::MovieID::Tag::Timestamp</p>
+                    </div>
+                </div>
+
+                <!-- Card 6: The Cold Start Problem -->
+                <div class="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="w-10 h-10 rounded-lg bg-cyan-100 dark:bg-cyan-900/50 text-cyan-600 dark:text-cyan-400 flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-snowflake text-lg"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">6. The Cold Start Problem</h3>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-3">
+                        Occurs when the system lacks sufficient historical data to compute standard similarity metrics:
+                    </p>
+                    <div class="space-y-2 text-xs">
+                        <div class="p-2.5 bg-slate-50 dark:bg-slate-700/40 rounded-lg border-l-4 border-cyan-500">
+                            <strong class="text-slate-900 dark:text-white">New User Cold Start:</strong>
+                            <p class="text-slate-600 dark:text-slate-300 mt-0.5">No historical ratings or past preferences available to draw upon.</p>
+                        </div>
+                        <div class="p-2.5 bg-slate-50 dark:bg-slate-700/40 rounded-lg border-l-4 border-blue-500">
+                            <strong class="text-slate-900 dark:text-white">New Item Cold Start:</strong>
+                            <p class="text-slate-600 dark:text-slate-300 mt-0.5">Newly introduced movie/product has zero interaction history or community feedback.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- TAB 2: FLASHCARD DECK -->
+        <section id="content-flashcards" class="tab-content hidden space-y-6">
+            <!-- Deck Filter & Controls -->
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                <div class="flex items-center gap-2 overflow-x-auto w-full sm:w-auto pb-2 sm:pb-0">
+                    <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider mr-2">Category:</span>
+                    <button onclick="filterFlashcards('all')" class="fc-filter-btn active text-xs px-3 py-1.5 rounded-full bg-brand-500 text-white font-medium">All (10)</button>
+                    <button onclick="filterFlashcards('netflix')" class="fc-filter-btn text-xs px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 font-medium">Netflix Prize</button>
+                    <button onclick="filterFlashcards('movielens')" class="fc-filter-btn text-xs px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 font-medium">MovieLens 10M</button>
+                    <button onclick="filterFlashcards('concepts')" class="fc-filter-btn text-xs px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 font-medium">Core Concepts</button>
+                </div>
+                
+                <div class="flex items-center gap-2">
+                    <button onclick="shuffleFlashcards()" class="text-xs px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-1.5 transition-colors">
+                        <i class="fa-solid fa-shuffle"></i> Shuffle Deck
+                    </button>
+                </div>
+            </div>
+
+            <!-- Flashcard Display Area -->
+            <div class="max-w-xl mx-auto">
+                <div class="perspective-1000 h-80 w-full cursor-pointer group" onclick="flipCurrentCard()">
+                    <div id="flashcard-element" class="transform-style-3d transition-transform duration-500 relative w-full h-full rounded-2xl bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 shadow-xl p-8 flex flex-col justify-between">
+                        
+                        <!-- Front Face -->
+                        <div class="backface-hidden absolute inset-0 p-8 flex flex-col justify-between rounded-2xl bg-white dark:bg-slate-800">
+                            <div class="flex items-center justify-between">
+                                <span id="card-tag" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-brand-100 dark:bg-brand-900/60 text-brand-700 dark:text-brand-300">
+                                    Topic
+                                </span>
+                                <span class="text-xs text-slate-400 flex items-center gap-1">
+                                    <i class="fa-solid fa-rotate"></i> Click or press Space to flip
+                                </span>
+                            </div>
+                            <div class="my-auto text-center">
+                                <h3 id="card-question" class="text-xl font-bold text-slate-800 dark:text-white leading-snug">
+                                    Question Text
+                                </h3>
+                            </div>
+                            <div class="text-center text-xs text-slate-400">
+                                Card <span id="card-counter">1 / 10</span>
+                            </div>
+                        </div>
+
+                        <!-- Back Face -->
+                        <div class="backface-hidden rotate-y-180 absolute inset-0 p-8 flex flex-col justify-between rounded-2xl bg-slate-900 text-white border-2 border-brand-500">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                                    Answer & Insight
+                                </span>
+                                <span class="text-xs text-slate-400 flex items-center gap-1">
+                                    <i class="fa-solid fa-rotate"></i> Flip back
+                                </span>
+                            </div>
+                            <div class="my-auto text-left space-y-2 overflow-y-auto max-h-48 pr-2">
+                                <p id="card-answer" class="text-sm text-slate-200 leading-relaxed">
+                                    Answer Text
+                                </p>
+                            </div>
+                            <div id="card-source" class="text-xs text-brand-300 italic border-t border-slate-800 pt-2">
+                                Slide Ref
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Flashcard Navigation & Assessment Controls -->
+                <div class="mt-6 flex flex-col items-center gap-4">
+                    <div class="flex items-center gap-4">
+                        <button onclick="prevCard()" class="p-3 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 shadow-sm text-slate-700 dark:text-slate-200">
+                            <i class="fa-solid fa-arrow-left"></i>
+                        </button>
+                        
+                        <div class="flex gap-2">
+                            <button onclick="markCardMastery(false)" class="px-4 py-2 rounded-lg bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300 hover:bg-rose-200 font-medium text-xs flex items-center gap-1.5">
+                                <i class="fa-solid fa-xmark"></i> Needs Practice
+                            </button>
+                            <button onclick="markCardMastery(true)" class="px-4 py-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-200 font-medium text-xs flex items-center gap-1.5">
+                                <i class="fa-solid fa-check"></i> Mastered
+                            </button>
+                        </div>
+
+                        <button onclick="nextCard()" class="p-3 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 shadow-sm text-slate-700 dark:text-slate-200">
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+
+                    <p class="text-xs text-slate-400">Keyboard shortcuts: <kbd class="px-1.5 py-0.5 bg-slate-200 dark:bg-slate-700 rounded text-slate-700 dark:text-slate-300">Left/Right</kbd> to navigate, <kbd class="px-1.5 py-0.5 bg-slate-200 dark:bg-slate-700 rounded text-slate-700 dark:text-slate-300">Space</kbd> to flip.</p>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- TAB 3: QUIZ MODULE -->
+        <section id="content-quiz" class="tab-content hidden space-y-6">
+            <div class="max-w-3xl mx-auto bg-white dark:bg-slate-800 rounded-2xl p-6 md:p-8 border border-slate-200 dark:border-slate-700 shadow-sm">
+                
+                <!-- Quiz Header -->
+                <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-4 mb-6">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900 dark:text-white">Lecture Mastery Quiz</h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Test your recall on the Netflix Prize, MovieLens 10M, and system design tradeoffs.</p>
+                    </div>
+                    <div id="quiz-timer" class="text-xs font-mono font-bold bg-slate-100 dark:bg-slate-700 px-3 py-1.5 rounded-lg text-slate-700 dark:text-slate-300">
+                        Question <span id="quiz-current-num">1</span> of <span id="quiz-total-num">5</span>
+                    </div>
+                </div>
+
+                <!-- Quiz Form Container -->
+                <div id="quiz-container" class="space-y-6">
+                    <div id="quiz-question-box" class="text-base font-semibold text-slate-800 dark:text-white">
+                        Question loading...
+                    </div>
+
+                    <div id="quiz-options-box" class="space-y-3">
+                        <!-- Options injected dynamically -->
+                    </div>
+
+                    <div id="quiz-explanation-box" class="hidden p-4 rounded-xl text-sm leading-relaxed border">
+                        <!-- Explanation injected dynamically -->
+                    </div>
+
+                    <div class="flex justify-between items-center pt-4 border-t border-slate-100 dark:border-slate-700">
+                        <button id="quiz-reset-btn" onclick="resetQuiz()" class="text-xs text-slate-500 hover:text-slate-800 dark:hover:text-slate-200">
+                            <i class="fa-solid fa-rotate-right"></i> Restart Quiz
+                        </button>
+                        <button id="quiz-next-btn" onclick="nextQuizQuestion()" class="hidden px-5 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-lg font-medium text-sm transition-colors">
+                            Next Question <i class="fa-solid fa-arrow-right ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Quiz Results Summary View (Hidden by default) -->
+                <div id="quiz-results-box" class="hidden text-center py-8 space-y-6">
+                    <div class="w-20 h-20 rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 mx-auto flex items-center justify-center text-3xl">
+                        <i class="fa-solid fa-award"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold text-slate-900 dark:text-white">Quiz Completed!</h3>
+                        <p class="text-slate-600 dark:text-slate-300 mt-1">
+                            Your Final Score: <span id="quiz-final-score" class="font-extrabold text-brand-600 dark:text-brand-400">0/5</span>
+                        </p>
+                        <p id="quiz-badge-text" class="text-xs font-semibold uppercase tracking-wider text-slate-500 mt-2"></p>
+                    </div>
+
+                    <div class="p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl max-w-md mx-auto text-xs text-slate-600 dark:text-slate-300 space-y-1 text-left">
+                        <strong class="block text-slate-800 dark:text-slate-100 mb-1">Key Takeaway Reminder:</strong>
+                        <p id="quiz-summary-feedback"></p>
+                    </div>
+
+                    <button onclick="resetQuiz()" class="px-6 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-medium text-sm rounded-xl transition-colors">
+                        Retake Quiz
+                    </button>
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- TAB 4: MOVIELENS 10M EDA LAB & SPARSITY CALCULATOR -->
+        <section id="content-movielens-lab" class="tab-content hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                <!-- Column 1 & 2: Dataset Interactive Inspector & Code Snippets -->
+                <div class="lg:col-span-2 space-y-6">
+                    
+                    <!-- File Format Interactive Schema Viewer -->
+                    <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm">
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-table-cells text-brand-500"></i> MovieLens 10M File Schema Inspector
+                        </h3>
+                        <p class="text-sm text-slate-600 dark:text-slate-300 mb-4">
+                            Click on any file to inspect its exact delimiter format and sample rows from the lecture notes.
+                        </p>
+
+                        <!-- File Selector Tabs -->
+                        <div class="flex space-x-2 border-b border-slate-200 dark:border-slate-700 mb-4">
+                            <button onclick="inspectFile('ratings')" id="file-btn-ratings" class="file-tab-btn px-4 py-2 border-b-2 border-brand-500 text-brand-600 dark:text-brand-400 font-medium text-xs">ratings.dat</button>
+                            <button onclick="inspectFile('movies')" id="file-btn-movies" class="file-tab-btn px-4 py-2 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-medium text-xs">movies.dat</button>
+                            <button onclick="inspectFile('tags')" id="file-btn-tags" class="file-tab-btn px-4 py-2 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-medium text-xs">tags.dat</button>
+                        </div>
+
+                        <!-- Inspector Output Box -->
+                        <div class="bg-slate-900 text-slate-100 p-4 rounded-xl font-mono text-xs overflow-x-auto space-y-3">
+                            <div class="flex items-center justify-between text-slate-400 border-b border-slate-800 pb-2">
+                                <span id="schema-delimiter">Delimiter: <code class="text-amber-400">::</code></span>
+                                <span id="schema-count">Total Records: 10,000,054</span>
+                            </div>
+                            <div class="text-amber-300 font-bold" id="schema-header">Format: UserID::MovieID::Rating::Timestamp</div>
+                            <div id="schema-sample-rows" class="space-y-1 text-slate-300">
+                                <div>1::122::5.0::838985046</div>
+                                <div>1::185::5.0::838983525</div>
+                                <div>1::231::5.0::838983392</div>
+                                <div>1::292::5.0::838983421</div>
+                                <div>1::316::5.0::838983392</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Python EDA Hands-on Guide -->
+                    <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                            <i class="fa-brands fa-python text-emerald-500"></i> Python Pandas Data Loading Snippet
+                        </h3>
+                        <p class="text-xs text-slate-600 dark:text-slate-300">
+                            How to load the `.dat` files into Pandas DataFrames as specified in Slide 11:
+                        </p>
+                        <div class="bg-slate-900 text-slate-200 p-4 rounded-xl font-mono text-xs overflow-x-auto">
+                            <pre><code><span class="text-purple-400">import</span> pandas <span class="text-purple-400">as</span> pd
+
+<span class="text-slate-500"># 1. Load ratings file</span>
+ratings_df = pd.read_csv(<span class="text-emerald-300">'ratings.dat'</span>, sep=<span class="text-emerald-300">'::'</span>, 
+                         names=[<span class="text-emerald-300">'UserID'</span>, <span class="text-emerald-300">'MovieID'</span>, <span class="text-emerald-300">'Rating'</span>, <span class="text-emerald-300">'Timestamp'</span>], 
+                         engine=<span class="text-emerald-300">'python'</span>)
+
+<span class="text-slate-500"># 2. Load movies file</span>
+movies_df = pd.read_csv(<span class="text-emerald-300">'movies.dat'</span>, sep=<span class="text-emerald-300">'::'</span>, 
+                        names=[<span class="text-emerald-300">'MovieID'</span>, <span class="text-emerald-300">'Title'</span>, <span class="text-emerald-300">'Genres'</span>], 
+                        engine=<span class="text-emerald-300">'python'</span>)
+
+<span class="text-slate-500"># 3. Check stats & sparsity</span>
+n_users = ratings_df[<span class="text-emerald-300">'UserID'</span>].nunique()
+n_movies = ratings_df[<span class="text-emerald-300">'MovieID'</span>].nunique()
+n_ratings = len(ratings_df)
+
+sparsity = 1.0 - (n_ratings / (n_users * n_movies))
+print(f<span class="text-emerald-300">"Sparsity: {sparsity * 100:.2f}%"</span>)</code></pre>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Column 3: Interactive Sparsity & Matrix Calculator -->
+                <div class="space-y-6">
+                    <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                            <i class="fa-solid fa-calculator text-amber-500"></i> Matrix Sparsity Calculator
+                        </h3>
+                        <p class="text-xs text-slate-600 dark:text-slate-300">
+                            Calculate the sparsity percentage of the user-item rating matrix $R_{m \times n}$:
+                        </p>
+
+                        <div class="p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl text-center text-xs text-slate-700 dark:text-slate-200 font-mono">
+                            $$\text{Sparsity} = 1 - \left(\frac{\text{Observed Ratings}}{\text{Users} \times \text{Items}}\right)$$
+                        </div>
+
+                        <!-- Inputs -->
+                        <div class="space-y-3 text-xs">
+                            <div>
+                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Number of Users ($U$)</label>
+                                <input type="number" id="calc-users" value="71567" class="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 font-mono" oninput="calculateSparsity()">
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Number of Movies ($I$)</label>
+                                <input type="number" id="calc-items" value="10681" class="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 font-mono" oninput="calculateSparsity()">
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Total Ratings ($N$)</label>
+                                <input type="number" id="calc-ratings" value="10000054" class="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 font-mono" oninput="calculateSparsity()">
+                            </div>
+                        </div>
+
+                        <!-- Result Display -->
+                        <div class="p-4 rounded-xl bg-brand-50 dark:bg-brand-900/30 border border-brand-200 dark:border-brand-800/50 text-center">
+                            <span class="block text-xs uppercase font-bold text-brand-700 dark:text-brand-300">Matrix Sparsity</span>
+                            <span id="calc-result" class="text-3xl font-extrabold text-brand-600 dark:text-brand-400 font-mono">98.69%</span>
+                            <span class="block text-[10px] text-slate-500 dark:text-slate-400 mt-1">98.69% of possible user-movie pairs are unobserved/missing!</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 py-4 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500 dark:text-slate-400">
+            Recommender Systems Lecture Study Guide • AI Data Factory (OPA AUEB)
+        </div>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- DATA STRUCTURES ---
+
+        // Flashcards Dataset
+        const flashcardsData = [
+            {
+                id: 1,
+                tag: "Core Concepts",
+                category: "concepts",
+                question: "What is the primary definition and business goal of a Recommender System?",
+                answer: "Recommender systems aim to predict user ratings or implicit preferences for items. They drive major business value by guiding users through massive catalogs (e.g., generating ~35% of Amazon's revenue and driving ~75% of Netflix watch time).",
+                source: "Slides 3 & 7"
+            },
+            {
+                id: 2,
+                tag: "Netflix Prize",
+                category: "netflix",
+                question: "What was the Netflix Prize challenge and what was the main goal?",
+                answer: "Launched in 2006, Netflix offered a $1 Million prize to the first team that could improve the Root Mean Squared Error (RMSE) rating prediction accuracy of its 'Cinematch' algorithm by at least 10%.",
+                source: "Slide 5"
+            },
+            {
+                id: 3,
+                tag: "Netflix Prize",
+                category: "netflix",
+                question: "Which team won the Netflix Prize and what level of improvement did they achieve?",
+                answer: "Team 'BellKor's Pragmatic Chaos' won the $1M prize in 2009 by achieving a 10.06% RMSE improvement over Cinematch.",
+                source: "Slide 5"
+            },
+            {
+                id: 4,
+                tag: "Netflix Prize",
+                category: "netflix",
+                question: "How many algorithms were combined for the Korbell team's 1st Progress Prize?",
+                answer: "The Korbell team reported over 2,000 engineering hours to combine 107 distinct algorithms to achieve an 8.43% initial progress prize improvement.",
+                source: "Slide 6"
+            },
+            {
+                id: 5,
+                tag: "Core Concepts",
+                category: "concepts",
+                question: "Why did Netflix NOT fully deploy the winning 107-algorithm ensemble to production?",
+                answer: "Due to high engineering complexity, computation costs, and scale constraints. The algorithm was built for offline batch execution on 100M static ratings, whereas production required real-time dynamic handling of >5 Billion ratings and streaming context.",
+                source: "Slides 5, 6, 8"
+            },
+            {
+                id: 6,
+                tag: "Core Concepts",
+                category: "concepts",
+                question: "Beyond rating prediction accuracy (RMSE), what key business metrics matter in a real-world recommender system?",
+                answer: "Context, title popularity, novelty, diversity, freshness, user interest, evidence, and real-time response latency.",
+                source: "Slide 8"
+            },
+            {
+                id: 7,
+                tag: "MovieLens 10M",
+                category: "movielens",
+                question: "What institution created the MovieLens 10M dataset, and what are its exact core statistics?",
+                answer: "Created by GroupLens (University of Minnesota, Twin Cities). It contains exactly 10,000,054 ratings, 95,580 tags, 10,681 movies, and 71,567 users.",
+                source: "Slides 9 & 10"
+            },
+            {
+                id: 8,
+                tag: "MovieLens 10M",
+                category: "movielens",
+                question: "What separator format is used in MovieLens 10M `.dat` files, and what is the structure of `ratings.dat`?",
+                answer: "The dataset uses double colons (`::`) as the separator. Structure of ratings.dat: `UserID::MovieID::Rating::Timestamp`.",
+                source: "Slide 10"
+            },
+            {
+                id: 9,
+                tag: "Core Concepts",
+                category: "concepts",
+                question: "What is the 'New User' Cold Start Problem?",
+                answer: "The challenge of recommending relevant items to a user who just joined the system and has zero historical ratings or interaction history.",
+                source: "Slide 12"
+            },
+            {
+                id: 10,
+                tag: "Core Concepts",
+                category: "concepts",
+                question: "What is the 'New Item' Cold Start Problem?",
+                answer: "The challenge of recommending a newly added movie or item that has received no user ratings or interactions yet.",
+                source: "Slide 12"
+            }
+        ];
+
+        // Quiz Questions Dataset
+        const quizData = [
+            {
+                question: "What percentage of content watched on Netflix was driven by its recommendation algorithms according to the lecture sources?",
+                options: ["25%", "50%", "75%", "90%"],
+                answerIndex: 2,
+                explanation: "According to the Netflix Tech Blog cited in Slide 7, 75% of what members watch stems from recommendation modules."
+            },
+            {
+                question: "How many algorithms were ensembled by the Korbell team to win the initial Netflix Progress Prize?",
+                options: ["10 algorithms", "47 algorithms", "107 algorithms", "500 algorithms"],
+                answerIndex: 2,
+                explanation: "Slide 6 notes that the Korbell team devoted >2000 hours combining 107 algorithms for an 8.43% improvement."
+            },
+            {
+                question: "What is the exact rating count in the MovieLens 10M dataset?",
+                options: ["1,000,000", "5,000,000", "10,000,054", "100,000,000"],
+                answerIndex: 2,
+                explanation: "Slide 10 specifies that the MovieLens 10M dataset contains 10,000,054 ratings and 95,580 tags."
+            },
+            {
+                question: "Which field delimiter is used in MovieLens 10M plain-text files?",
+                options: [", (comma)", "\\t (tab)", ":: (double colon)", "| (pipe)"],
+                answerIndex: 2,
+                explanation: "Slide 10 highlights that ratings.dat, movies.dat, and tags.dat use `::` as the column separator."
+            },
+            {
+                question: "When a brand new movie with zero views is added to a streaming catalog, which specific issue arises?",
+                options: ["User Cold Start", "New Item Cold Start", "Overfitting Bias", "Rating Matrix Saturation"],
+                answerIndex: 1,
+                explanation: "Slide 12 defines the New Item Cold Start problem as the difficulty in recommending an item with no ratings or interaction history."
+            }
+        ];
+
+        // --- STATE MANAGEMENT ---
+        let currentDeck = [...flashcardsData];
+        let currentCardIndex = 0;
+        let isCardFlipped = false;
+        let masteredCards = new Set();
+
+        let currentQuizIndex = 0;
+        let quizScore = 0;
+        let quizAnswers = new Array(quizData.length).fill(null);
+
+
+        // --- TAB SWITCHING ---
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('text-brand-600', 'dark:text-brand-400', 'bg-brand-50', 'dark:bg-brand-900/30');
+                el.classList.add('text-slate-600', 'dark:text-slate-400');
+            });
+
+            document.getElementById(`content-${tabId}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`tab-${tabId}`);
+            activeBtn.classList.add('text-brand-600', 'dark:text-brand-400', 'bg-brand-50', 'dark:bg-brand-900/30');
+            activeBtn.classList.remove('text-slate-600', 'dark:text-slate-400');
+        }
+
+
+        // --- FLASHCARD LOGIC ---
+        function updateCardDisplay() {
+            if (currentDeck.length === 0) return;
+            const card = currentDeck[currentCardIndex];
+            
+            // Ensure card is un-flipped when changing
+            const cardEl = document.getElementById('flashcard-element');
+            cardEl.classList.remove('rotate-y-180');
+            isCardFlipped = false;
+
+            setTimeout(() => {
+                document.getElementById('card-tag').innerText = card.tag;
+                document.getElementById('card-question').innerText = card.question;
+                document.getElementById('card-answer').innerText = card.answer;
+                document.getElementById('card-source').innerText = `Source: ${card.source}`;
+                document.getElementById('card-counter').innerText = `${currentCardIndex + 1} / ${currentDeck.length}`;
+            }, 150);
+        }
+
+        function flipCurrentCard() {
+            const cardEl = document.getElementById('flashcard-element');
+            isCardFlipped = !isCardFlipped;
+            if (isCardFlipped) {
+                cardEl.classList.add('rotate-y-180');
+            } else {
+                cardEl.classList.remove('rotate-y-180');
+            }
+        }
+
+        function nextCard() {
+            if (currentDeck.length === 0) return;
+            currentCardIndex = (currentCardIndex + 1) % currentDeck.length;
+            updateCardDisplay();
+        }
+
+        function prevCard() {
+            if (currentDeck.length === 0) return;
+            currentCardIndex = (currentCardIndex - 1 + currentDeck.length) % currentDeck.length;
+            updateCardDisplay();
+        }
+
+        function filterFlashcards(cat) {
+            document.querySelectorAll('.fc-filter-btn').forEach(btn => {
+                btn.classList.remove('bg-brand-500', 'text-white');
+                btn.classList.add('bg-slate-100', 'dark:bg-slate-700', 'text-slate-600', 'dark:text-slate-300');
+            });
+            event.target.classList.add('bg-brand-500', 'text-white');
+
+            if (cat === 'all') {
+                currentDeck = [...flashcardsData];
+            } else {
+                currentDeck = flashcardsData.filter(c => c.category === cat);
+            }
+            currentCardIndex = 0;
+            updateCardDisplay();
+        }
+
+        function shuffleFlashcards() {
+            for (let i = currentDeck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [currentDeck[i], currentDeck[j]] = [currentDeck[j], currentDeck[i]];
+            }
+            currentCardIndex = 0;
+            updateCardDisplay();
+        }
+
+        function markCardMastery(isMastered) {
+            const card = currentDeck[currentCardIndex];
+            if (isMastered) {
+                masteredCards.add(card.id);
+            } else {
+                masteredCards.delete(card.id);
+            }
+            updateMasteryProgress();
+            nextCard();
+        }
+
+        function updateMasteryProgress() {
+            const count = masteredCards.size;
+            const pct = (count / flashcardsData.length) * 100;
+            document.getElementById('flashcard-progress-bar').style.width = `${pct}%`;
+            document.getElementById('flashcard-progress-text').innerText = `${count}/${flashcardsData.length}`;
+        }
+
+
+        // --- QUIZ LOGIC ---
+        function renderQuizQuestion() {
+            const q = quizData[currentQuizIndex];
+            document.getElementById('quiz-current-num').innerText = currentQuizIndex + 1;
+            document.getElementById('quiz-total-num').innerText = quizData.length;
+            document.getElementById('quiz-question-box').innerText = q.question;
+
+            const optionsBox = document.getElementById('quiz-options-box');
+            optionsBox.innerHTML = '';
+
+            const explanationBox = document.getElementById('quiz-explanation-box');
+            explanationBox.classList.add('hidden');
+
+            const nextBtn = document.getElementById('quiz-next-btn');
+            nextBtn.classList.add('hidden');
+
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-sm font-medium flex items-center justify-between";
+                btn.innerHTML = `<span>${String.fromCharCode(65 + idx)}. ${opt}</span> <i class="quiz-icon fa-regular fa-circle text-slate-400"></i>`;
+                btn.onclick = () => selectQuizOption(idx);
+                optionsBox.appendChild(btn);
+            });
+        }
+
+        function selectQuizOption(optIdx) {
+            const q = quizData[currentQuizIndex];
+            const optionsBox = document.getElementById('quiz-options-box');
+            const buttons = optionsBox.querySelectorAll('button');
+
+            // Disable all buttons
+            buttons.forEach(btn => btn.disabled = true);
+
+            const isCorrect = optIdx === q.answerIndex;
+            if (isCorrect) quizScore++;
+
+            // Highlight selected & correct
+            buttons[optIdx].classList.remove('border-slate-200', 'dark:border-slate-700');
+            if (isCorrect) {
+                buttons[optIdx].classList.add('bg-emerald-50', 'dark:bg-emerald-900/30', 'border-emerald-500', 'text-emerald-800', 'dark:text-emerald-300');
+                buttons[optIdx].querySelector('.quiz-icon').className = "fa-solid fa-circle-check text-emerald-500";
+            } else {
+                buttons[optIdx].classList.add('bg-rose-50', 'dark:bg-rose-900/30', 'border-rose-500', 'text-rose-800', 'dark:text-rose-300');
+                buttons[optIdx].querySelector('.quiz-icon').className = "fa-solid fa-circle-xmark text-rose-500";
+
+                // Highlight correct answer
+                buttons[q.answerIndex].classList.add('bg-emerald-50', 'dark:bg-emerald-900/30', 'border-emerald-500', 'text-emerald-800', 'dark:text-emerald-300');
+            }
+
+            // Show explanation
+            const expBox = document.getElementById('quiz-explanation-box');
+            expBox.innerHTML = `<strong>${isCorrect ? 'Correct!' : 'Incorrect.'}</strong> ${q.explanation}`;
+            expBox.className = `p-4 rounded-xl text-xs leading-relaxed border ${isCorrect ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 text-emerald-800 dark:text-emerald-200' : 'bg-rose-50 dark:bg-rose-900/20 border-rose-200 text-rose-800 dark:text-rose-200'}`;
+            expBox.classList.remove('hidden');
+
+            document.getElementById('quiz-next-btn').classList.remove('hidden');
+        }
+
+        function nextQuizQuestion() {
+            currentQuizIndex++;
+            if (currentQuizIndex < quizData.length) {
+                renderQuizQuestion();
+            } else {
+                showQuizResults();
+            }
+        }
+
+        function showQuizResults() {
+            document.getElementById('quiz-container').classList.add('hidden');
+            const resultsBox = document.getElementById('quiz-results-box');
+            resultsBox.classList.remove('hidden');
+
+            document.getElementById('quiz-final-score').innerText = `${quizScore} / ${quizData.length}`;
+            
+            const badge = document.getElementById('quiz-badge-text');
+            const feedback = document.getElementById('quiz-summary-feedback');
+
+            const scorePct = (quizScore / quizData.length) * 100;
+            if (scorePct >= 80) {
+                badge.innerText = "Mastery Level: Recommender Expert";
+                badge.className = "text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400";
+                feedback.innerText = "Excellent comprehension of system scale, MovieLens data schemas, and the engineering limitations of offline accuracy metrics.";
+            } else {
+                badge.innerText = "Mastery Level: Developing Novice";
+                badge.className = "text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400";
+                feedback.innerText = "Review the slides on the Netflix Prize ensemble constraints and MovieLens dataset schemas to solidify your understanding.";
+            }
+
+            // Update header quiz badge
+            const badgeHeader = document.getElementById('quiz-score-badge');
+            badgeHeader.innerText = `${scorePct}%`;
+            badgeHeader.className = scorePct >= 80 ? "font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300" : "font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-300";
+        }
+
+        function resetQuiz() {
+            currentQuizIndex = 0;
+            quizScore = 0;
+            document.getElementById('quiz-results-box').classList.add('hidden');
+            document.getElementById('quiz-container').classList.remove('hidden');
+            renderQuizQuestion();
+        }
+
+
+        // --- MOVIELENS INSPECTOR & CALCULATOR ---
+        const schemaSamples = {
+            ratings: {
+                delimiter: "::",
+                count: "10,000,054",
+                header: "UserID::MovieID::Rating::Timestamp",
+                rows: [
+                    "1::122::5.0::838985046",
+                    "1::185::5.0::838983525",
+                    "1::231::5.0::838983392",
+                    "1::292::5.0::838983421",
+                    "1::316::5.0::838983392"
+                ]
+            },
+            movies: {
+                delimiter: "::",
+                count: "10,681",
+                header: "MovieID::Title::Genres",
+                rows: [
+                    "1::Toy Story (1995)::Adventure|Animation|Children|Comedy|Fantasy",
+                    "2::Jumanji (1995)::Adventure|Children|Fantasy",
+                    "3::Grumpier Old Men (1995)::Comedy|Romance",
+                    "4::Waiting to Exhale (1995)::Comedy|Drama|Romance",
+                    "5::Father of the Bride Part II (1995)::Comedy"
+                ]
+            },
+            tags: {
+                delimiter: "::",
+                count: "95,580",
+                header: "UserID::MovieID::Tag::Timestamp",
+                rows: [
+                    "15::4973::classic::1215194623",
+                    "20::1747::space::1188263801",
+                    "20::1968::funny::1188263801",
+                    "56::1733::dark comedy::1156218392"
+                ]
+            }
+        };
+
+        function inspectFile(fileType) {
+            document.querySelectorAll('.file-tab-btn').forEach(btn => {
+                btn.classList.remove('border-brand-500', 'text-brand-600', 'dark:text-brand-400');
+                btn.classList.add('border-transparent', 'text-slate-500');
+            });
+            document.getElementById(`file-btn-${fileType}`).classList.add('border-brand-500', 'text-brand-600', 'dark:text-brand-400');
+
+            const data = schemaSamples[fileType];
+            document.getElementById('schema-delimiter').innerHTML = `Delimiter: <code class="text-amber-400">${data.delimiter}</code>`;
+            document.getElementById('schema-count').innerText = `Total Records: ${data.count}`;
+            document.getElementById('schema-header').innerText = `Format: ${data.header}`;
+
+            const rowsContainer = document.getElementById('schema-sample-rows');
+            rowsContainer.innerHTML = '';
+            data.rows.forEach(r => {
+                const div = document.createElement('div');
+                div.innerText = r;
+                rowsContainer.appendChild(div);
+            });
+        }
+
+        function calculateSparsity() {
+            const users = parseFloat(document.getElementById('calc-users').value) || 0;
+            const items = parseFloat(document.getElementById('calc-items').value) || 0;
+            const ratings = parseFloat(document.getElementById('calc-ratings').value) || 0;
+
+            if (users <= 0 || items <= 0) return;
+
+            const possible = users * items;
+            const sparsity = (1.0 - (ratings / possible)) * 100;
+            document.getElementById('calc-result').innerText = `${sparsity.toFixed(2)}%`;
+        }
+
+
+        // --- THEME & KEYBOARD LISTENERS ---
+        document.getElementById('theme-toggle').addEventListener('click', () => {
+            const isDark = document.documentElement.classList.toggle('dark');
+            document.getElementById('theme-toggle-icon').className = isDark ? "fa-solid fa-sun" : "fa-solid fa-moon";
+        });
+
+        document.addEventListener('keydown', (e) => {
+            const activeTab = document.querySelector('.tab-content:not(.hidden)').id;
+            if (activeTab === 'content-flashcards') {
+                if (e.code === 'Space') {
+                    e.preventDefault();
+                    flipCurrentCard();
+                } else if (e.code === 'ArrowRight') {
+                    nextCard();
+                } else if (e.code === 'ArrowLeft') {
+                    prevCard();
+                }
+            }
+        });
+
+        // Initialize state
+        window.addEventListener('DOMContentLoaded', () => {
+            updateCardDisplay();
+            renderQuizQuestion();
+            calculateSparsity();
+        });
+    </script>
+</body>
+</html>

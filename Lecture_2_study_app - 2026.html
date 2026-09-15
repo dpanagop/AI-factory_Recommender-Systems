@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recommender Systems - Interactive Study Guide (Lecture 2)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        accent: {
+                            500: '#f59e0b',
+                            600: '#d97706',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- MathJax Configuration and Script -->
+    <script>
+    window.MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+            fontCache: 'global'
+        }
+    };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script type="text/javascript" id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* Custom 3D Flip Card Styles */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        .transform-style-3d {
+            transform-style: preserve-3d;
+        }
+        .backface-hidden {
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .dark ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-full flex flex-col font-sans transition-colors duration-200">
+
+    <!-- Header & Navigation -->
+    <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col md:flex-row items-center justify-between gap-4">
+            <!-- Title & Institution Info -->
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-brand-500 text-white rounded-lg shadow-md">
+                    <i class="fa-solid fa-table-cells text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+                        Recommender Systems
+                        <span class="text-xs font-semibold px-2 py-0.5 rounded bg-brand-100 dark:bg-brand-900/60 text-brand-700 dark:text-brand-300">Lecture 2</span>
+                    </h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">
+                        AUEB AI Data Factory • Dr. Dimitrios Panagopoulos • <a href="https://dpanagopoulos.com/" target="_blank" class="hover:underline text-brand-600 dark:text-brand-400">for more info visit my site</a>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Progress Dashboard Bar -->
+            <div class="flex items-center gap-6 w-full md:w-auto justify-between md:justify-end">
+                <div class="flex items-center gap-4 text-xs">
+                    <!-- Flashcard Progress -->
+                    <div class="flex flex-col">
+                        <span class="text-slate-500 dark:text-slate-400 font-medium">Flashcards Mastered</span>
+                        <div class="flex items-center gap-2">
+                            <div class="w-24 bg-slate-200 dark:bg-slate-700 rounded-full h-2 overflow-hidden">
+                                <div id="flashcard-progress-bar" class="bg-emerald-500 h-full transition-all duration-300" style="width: 0%"></div>
+                            </div>
+                            <span id="flashcard-progress-text" class="font-bold text-slate-700 dark:text-slate-200">0/10</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Quiz Progress -->
+                    <div class="flex flex-col">
+                        <span class="text-slate-500 dark:text-slate-400 font-medium">Quiz Score</span>
+                        <div class="flex items-center gap-2">
+                            <span id="quiz-score-badge" class="font-bold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
+                                Unattempted
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dark Mode Toggle -->
+                <button id="theme-toggle" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors" title="Toggle Theme">
+                    <i id="theme-toggle-icon" class="fa-solid fa-moon"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-slate-100 dark:border-slate-700/50">
+            <nav class="flex space-x-8 overflow-x-auto py-2 text-sm font-medium">
+                <button onclick="switchTab('lecture-summary')" id="tab-lecture-summary" class="tab-btn px-3 py-2 rounded-md text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-900/30 whitespace-nowrap flex items-center gap-2">
+                    <i class="fa-solid fa-book-open"></i> Key Concepts & Notes
+                </button>
+                <button onclick="switchTab('flashcards')" id="tab-flashcards" class="tab-btn px-3 py-2 rounded-md text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white whitespace-nowrap flex items-center gap-2">
+                    <i class="fa-solid fa-clone"></i> Flashcard Deck
+                </button>
+                <button onclick="switchTab('quiz')" id="tab-quiz" class="tab-btn px-3 py-2 rounded-md text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white whitespace-nowrap flex items-center gap-2">
+                    <i class="fa-solid fa-circle-question"></i> Knowledge Quiz
+                </button>
+                <button onclick="switchTab('matrix-lab')" id="tab-matrix-lab" class="tab-btn px-3 py-2 rounded-md text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white whitespace-nowrap flex items-center gap-2">
+                    <i class="fa-solid fa-laptop-code"></i> Matrix Factorization & SVD Lab
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- TAB 1: LECTURE SUMMARY & KEY CONCEPTS -->
+        <section id="content-lecture-summary" class="tab-content space-y-6">
+            <!-- Hero Banner -->
+            <div class="bg-gradient-to-r from-brand-700 via-brand-600 to-indigo-700 text-white rounded-2xl p-6 md:p-8 shadow-lg">
+                <div class="max-w-3xl">
+                    <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight mb-2">
+                        Lecture 2: Matrix Factorization & Collaborative Filtering
+                    </h2>
+                    <p class="text-brand-100 text-sm md:text-base leading-relaxed">
+                        In-depth exploration of Matrix Factorization, Singular Value Decomposition (SVD), Stochastic Gradient Descent (SGD) with L2 regularization, evaluation strategies, and latent factor interpretability.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Key Modules Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                <!-- Card 1: Evaluation Strategies -->
+                <div class="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-vial text-lg"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">1. System Evaluation & Train/Test Splitting</h3>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
+                        Proper offline validation is crucial before deploying recommendation models.
+                    </p>
+                    <ul class="text-xs space-y-2 text-slate-600 dark:text-slate-400">
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-clock text-brand-500 mt-0.5"></i>
+                            <span><strong>Temporal Split (Last-K):</strong> Uses timestamps so test set contains the user's most recent $k$ ratings, mimicking real-world future prediction.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-shuffle text-emerald-500 mt-0.5"></i>
+                            <span><strong>Random User Split:</strong> Randomly partitions interactions (e.g., 80% train / 20% test) across known users.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-users-slash text-amber-500 mt-0.5"></i>
+                            <span><strong>Cold User Handling:</strong> Decisions must be made on whether test sets allow unseen users not present during training.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Card 2: Core Matrix Factorization -->
+                <div class="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400 flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-cubes text-lg"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">2. Matrix Factorization Concept</h3>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-3">
+                        Decomposes the user-item interaction matrix $R_{n \times m}$ into lower-rank user preference matrix $P_{n \times k}$ and item weight matrix $W_{k \times m}$.
+                    </p>
+                    <div class="bg-slate-50 dark:bg-slate-900/60 p-3 rounded-lg border border-slate-100 dark:border-slate-700/50 text-xs space-y-1">
+                        <p class="text-slate-700 dark:text-slate-300"><strong>Predicted Rating:</strong></p>
+                        <p class="text-center font-mono text-brand-600 dark:text-brand-400 my-1">
+                            $$\hat{r}_{ij} = \sum_{l=1}^{k} pr_{il} w_{lj} = \mathbf{p}_i^T \mathbf{w}_j$$
+                        </p>
+                        <p class="text-slate-500 dark:text-slate-400">Where $k$ represents hidden/latent characteristics (e.g., action level, drama, pacing).</p>
+                    </div>
+                </div>
+
+                <!-- Card 3: Exact SVD & Mathematical Derivation -->
+                <div class="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-square-root-variable text-lg"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">3. SVD Formulation</h3>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-3">
+                        Linear algebra decomposition of matrix $A_{m \times n}$:
+                    </p>
+                    <div class="font-mono text-xs bg-slate-900 text-slate-200 p-3 rounded-lg space-y-1.5 overflow-x-auto text-center">
+                        $$A = U \Sigma V^T$$
+                        <div class="text-[11px] text-slate-400 text-left mt-1">
+                            • $U$: $m \times m$ orthogonal matrix (Left singular vectors)<br>
+                            • $\Sigma$: $m \times n$ diagonal matrix (Singular values $\sigma_1 \ge \sigma_2 \dots$)<br>
+                            • $V^T$: $n \times n$ transpose orthogonal matrix (Right singular vectors)
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 4: Drawbacks of Standard SVD -->
+                <div class="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="w-10 h-10 rounded-lg bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-400 flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-triangle-exclamation text-lg"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">4. Drawbacks of Standard SVD on Sparse Data</h3>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-3">
+                        Why direct linear algebra SVD breaks down on real recommender matrices:
+                    </p>
+                    <ul class="text-xs space-y-2 text-slate-600 dark:text-slate-400">
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-xmark text-rose-500 mt-0.5"></i>
+                            <span><strong>Sparsity & Imputation:</strong> Standard SVD requires a dense matrix. Imputing missing values with 0s or means introduces severe noise.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-xmark text-rose-500 mt-0.5"></i>
+                            <span><strong>Overfitting to Imputed Data:</strong> The algorithm optimizes reconstruction of non-interactions rather than true underlying user preferences.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Card 5: Stochastic Gradient Descent (Funk SVD) -->
+                <div class="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-arrow-trend-down text-lg"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">5. Regularized Stochastic Gradient Descent (SGD)</h3>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-3">
+                        Minimizes error directly over observed ratings $\Omega$ with $L2$ regularization:
+                    </p>
+                    <div class="bg-slate-50 dark:bg-slate-700/50 p-2.5 rounded-lg text-xs font-mono space-y-1">
+                        <p class="text-slate-800 dark:text-slate-200">Error: $e_{ij} = r_{ij} - \mathbf{p}_i^T \mathbf{w}_j$</p>
+                        <p class="text-emerald-600 dark:text-emerald-400">$\mathbf{p}_i \leftarrow \mathbf{p}_i + \gamma (e_{ij} \mathbf{w}_j - \lambda \mathbf{p}_i)$</p>
+                        <p class="text-emerald-600 dark:text-emerald-400">$\mathbf{w}_j \leftarrow \mathbf{w}_j + \gamma (e_{ij} \mathbf{p}_i - \lambda \mathbf{w}_j)$</p>
+                    </div>
+                </div>
+
+                <!-- Card 6: Interpreting Latent Factors -->
+                <div class="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="w-10 h-10 rounded-lg bg-cyan-100 dark:bg-cyan-900/50 text-cyan-600 dark:text-cyan-400 flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-chart-pie text-lg"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">6. Latent Factor Interpretability</h3>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-3">
+                        Uncovering the semantics of abstract mathematical dimensions:
+                    </p>
+                    <div class="space-y-2 text-xs">
+                        <div class="p-2.5 bg-slate-50 dark:bg-slate-700/40 rounded-lg border-l-4 border-cyan-500">
+                            <strong class="text-slate-900 dark:text-white">Genre Averaging:</strong>
+                            <p class="text-slate-600 dark:text-slate-300 mt-0.5">Average row vectors of $V^T$ for all movies in a genre to project genre profiles into latent factor space.</p>
+                        </div>
+                        <div class="p-2.5 bg-slate-50 dark:bg-slate-700/40 rounded-lg border-l-4 border-blue-500">
+                            <strong class="text-slate-900 dark:text-white">Clustering:</strong>
+                            <p class="text-slate-600 dark:text-slate-300 mt-0.5">Apply K-Means clustering on $V^T$ combined with tags/genres to reveal hidden film archetypes.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- TAB 2: FLASHCARD DECK -->
+        <section id="content-flashcards" class="tab-content hidden space-y-6">
+            <!-- Deck Filter & Controls -->
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                <div class="flex items-center gap-2 overflow-x-auto w-full sm:w-auto pb-2 sm:pb-0">
+                    <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider mr-2">Category:</span>
+                    <button onclick="filterFlashcards('all')" class="fc-filter-btn active text-xs px-3 py-1.5 rounded-full bg-brand-500 text-white font-medium">All (10)</button>
+                    <button onclick="filterFlashcards('svd')" class="fc-filter-btn text-xs px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 font-medium">SVD & Maths</button>
+                    <button onclick="filterFlashcards('sgd')" class="fc-filter-btn text-xs px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 font-medium">SGD & Optimization</button>
+                    <button onclick="filterFlashcards('evaluation')" class="fc-filter-btn text-xs px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 font-medium">Evaluation & Interpretation</button>
+                </div>
+                
+                <div class="flex items-center gap-2">
+                    <button onclick="shuffleFlashcards()" class="text-xs px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-1.5 transition-colors">
+                        <i class="fa-solid fa-shuffle"></i> Shuffle Deck
+                    </button>
+                </div>
+            </div>
+
+            <!-- Flashcard Display Area -->
+            <div class="max-w-xl mx-auto">
+                <div class="perspective-1000 h-80 w-full cursor-pointer group" onclick="flipCurrentCard()">
+                    <div id="flashcard-element" class="transform-style-3d transition-transform duration-500 relative w-full h-full rounded-2xl bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 shadow-xl p-8 flex flex-col justify-between">
+                        
+                        <!-- Front Face -->
+                        <div class="backface-hidden absolute inset-0 p-8 flex flex-col justify-between rounded-2xl bg-white dark:bg-slate-800">
+                            <div class="flex items-center justify-between">
+                                <span id="card-tag" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-brand-100 dark:bg-brand-900/60 text-brand-700 dark:text-brand-300">
+                                    Topic
+                                </span>
+                                <span class="text-xs text-slate-400 flex items-center gap-1">
+                                    <i class="fa-solid fa-rotate"></i> Click or press Space to flip
+                                </span>
+                            </div>
+                            <div class="my-auto text-center">
+                                <h3 id="card-question" class="text-xl font-bold text-slate-800 dark:text-white leading-snug">
+                                    Question Text
+                                </h3>
+                            </div>
+                            <div class="text-center text-xs text-slate-400">
+                                Card <span id="card-counter">1 / 10</span>
+                            </div>
+                        </div>
+
+                        <!-- Back Face -->
+                        <div class="backface-hidden rotate-y-180 absolute inset-0 p-8 flex flex-col justify-between rounded-2xl bg-slate-900 text-white border-2 border-brand-500">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                                    Answer & Insight
+                                </span>
+                                <span class="text-xs text-slate-400 flex items-center gap-1">
+                                    <i class="fa-solid fa-rotate"></i> Flip back
+                                </span>
+                            </div>
+                            <div class="my-auto text-left space-y-2 overflow-y-auto max-h-48 pr-2">
+                                <p id="card-answer" class="text-sm text-slate-200 leading-relaxed">
+                                    Answer Text
+                                </p>
+                            </div>
+                            <div id="card-source" class="text-xs text-brand-300 italic border-t border-slate-800 pt-2">
+                                Slide Ref
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Flashcard Navigation & Assessment Controls -->
+                <div class="mt-6 flex flex-col items-center gap-4">
+                    <div class="flex items-center gap-4">
+                        <button onclick="prevCard()" class="p-3 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 shadow-sm text-slate-700 dark:text-slate-200">
+                            <i class="fa-solid fa-arrow-left"></i>
+                        </button>
+                        
+                        <div class="flex gap-2">
+                            <button onclick="markCardMastery(false)" class="px-4 py-2 rounded-lg bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300 hover:bg-rose-200 font-medium text-xs flex items-center gap-1.5">
+                                <i class="fa-solid fa-xmark"></i> Needs Practice
+                            </button>
+                            <button onclick="markCardMastery(true)" class="px-4 py-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-200 font-medium text-xs flex items-center gap-1.5">
+                                <i class="fa-solid fa-check"></i> Mastered
+                            </button>
+                        </div>
+
+                        <button onclick="nextCard()" class="p-3 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 shadow-sm text-slate-700 dark:text-slate-200">
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+
+                    <p class="text-xs text-slate-400">Keyboard shortcuts: <kbd class="px-1.5 py-0.5 bg-slate-200 dark:bg-slate-700 rounded text-slate-700 dark:text-slate-300">Left/Right</kbd> to navigate, <kbd class="px-1.5 py-0.5 bg-slate-200 dark:bg-slate-700 rounded text-slate-700 dark:text-slate-300">Space</kbd> to flip.</p>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- TAB 3: QUIZ MODULE -->
+        <section id="content-quiz" class="tab-content hidden space-y-6">
+            <div class="max-w-3xl mx-auto bg-white dark:bg-slate-800 rounded-2xl p-6 md:p-8 border border-slate-200 dark:border-slate-700 shadow-sm">
+                
+                <!-- Quiz Header -->
+                <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-4 mb-6">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900 dark:text-white">Lecture 2 Mastery Quiz</h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Test your recall on SVD, SGD, regularization, latent factors, and validation metrics.</p>
+                    </div>
+                    <div id="quiz-timer" class="text-xs font-mono font-bold bg-slate-100 dark:bg-slate-700 px-3 py-1.5 rounded-lg text-slate-700 dark:text-slate-300">
+                        Question <span id="quiz-current-num">1</span> of <span id="quiz-total-num">5</span>
+                    </div>
+                </div>
+
+                <!-- Quiz Form Container -->
+                <div id="quiz-container" class="space-y-6">
+                    <div id="quiz-question-box" class="text-base font-semibold text-slate-800 dark:text-white">
+                        Question loading...
+                    </div>
+
+                    <div id="quiz-options-box" class="space-y-3">
+                        <!-- Options injected dynamically -->
+                    </div>
+
+                    <div id="quiz-explanation-box" class="hidden p-4 rounded-xl text-sm leading-relaxed border">
+                        <!-- Explanation injected dynamically -->
+                    </div>
+
+                    <div class="flex justify-between items-center pt-4 border-t border-slate-100 dark:border-slate-700">
+                        <button id="quiz-reset-btn" onclick="resetQuiz()" class="text-xs text-slate-500 hover:text-slate-800 dark:hover:text-slate-200">
+                            <i class="fa-solid fa-rotate-right"></i> Restart Quiz
+                        </button>
+                        <button id="quiz-next-btn" onclick="nextQuizQuestion()" class="hidden px-5 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-lg font-medium text-sm transition-colors">
+                            Next Question <i class="fa-solid fa-arrow-right ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Quiz Results Summary View (Hidden by default) -->
+                <div id="quiz-results-box" class="hidden text-center py-8 space-y-6">
+                    <div class="w-20 h-20 rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 mx-auto flex items-center justify-center text-3xl">
+                        <i class="fa-solid fa-award"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold text-slate-900 dark:text-white">Quiz Completed!</h3>
+                        <p class="text-slate-600 dark:text-slate-300 mt-1">
+                            Your Final Score: <span id="quiz-final-score" class="font-extrabold text-brand-600 dark:text-brand-400">0/5</span>
+                        </p>
+                        <p id="quiz-badge-text" class="text-xs font-semibold uppercase tracking-wider text-slate-500 mt-2"></p>
+                    </div>
+
+                    <div class="p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl max-w-md mx-auto text-xs text-slate-600 dark:text-slate-300 space-y-1 text-left">
+                        <strong class="block text-slate-800 dark:text-slate-100 mb-1">Key Takeaway Reminder:</strong>
+                        <p id="quiz-summary-feedback"></p>
+                    </div>
+
+                    <button onclick="resetQuiz()" class="px-6 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-medium text-sm rounded-xl transition-colors">
+                        Retake Quiz
+                    </button>
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- TAB 4: MATRIX FACTORIZATION & SVD LAB -->
+        <section id="content-matrix-lab" class="tab-content hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                <!-- Column 1 & 2: Interactive Matrix Calculator & Code Implementations -->
+                <div class="lg:col-span-2 space-y-6">
+                    
+                    <!-- Interactive Matrix Factorization Simulator -->
+                    <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm">
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-calculator text-brand-500"></i> Interactive 2-Factor Dot Product Simulator
+                        </h3>
+                        <p class="text-sm text-slate-600 dark:text-slate-300 mb-4">
+                            Adjust user preference factors ($p_{u1}, p_{u2}$) and movie characteristics ($w_{1i}, w_{2i}$) to calculate predicted rating $\hat{r}_{ui} = p_{u1}w_{1i} + p_{u2}w_{2i}$.
+                        </p>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50 dark:bg-slate-900/60 p-4 rounded-xl border border-slate-200 dark:border-slate-700 text-xs">
+                            <!-- User Sliders -->
+                            <div class="space-y-3">
+                                <h4 class="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-user text-brand-500"></i> User Vector ($\mathbf{p}_u$)
+                                </h4>
+                                <div>
+                                    <div class="flex justify-between mb-1">
+                                        <span>Factor 1 (Action Preference):</span>
+                                        <span id="val-pu1" class="font-mono font-bold text-brand-600 dark:text-brand-400">0.80</span>
+                                    </div>
+                                    <input type="range" id="slider-pu1" min="-2" max="2" step="0.1" value="0.8" class="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer dark:bg-slate-700" oninput="updateMatrixSim()">
+                                </div>
+                                <div>
+                                    <div class="flex justify-between mb-1">
+                                        <span>Factor 2 (Comedy Preference):</span>
+                                        <span id="val-pu2" class="font-mono font-bold text-brand-600 dark:text-brand-400">0.30</span>
+                                    </div>
+                                    <input type="range" id="slider-pu2" min="-2" max="2" step="0.1" value="0.3" class="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer dark:bg-slate-700" oninput="updateMatrixSim()">
+                                </div>
+                            </div>
+
+                            <!-- Movie Sliders -->
+                            <div class="space-y-3">
+                                <h4 class="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-film text-amber-500"></i> Movie Vector ($\mathbf{w}_i$)
+                                </h4>
+                                <div>
+                                    <div class="flex justify-between mb-1">
+                                        <span>Factor 1 (Action Weight):</span>
+                                        <span id="val-wi1" class="font-mono font-bold text-amber-600 dark:text-amber-400">1.20</span>
+                                    </div>
+                                    <input type="range" id="slider-wi1" min="-2" max="2" step="0.1" value="1.2" class="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer dark:bg-slate-700" oninput="updateMatrixSim()">
+                                </div>
+                                <div>
+                                    <div class="flex justify-between mb-1">
+                                        <span>Factor 2 (Comedy Weight):</span>
+                                        <span id="val-wi2" class="font-mono font-bold text-amber-600 dark:text-amber-400">-0.50</span>
+                                    </div>
+                                    <input type="range" id="slider-wi2" min="-2" max="2" step="0.1" value="-0.5" class="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer dark:bg-slate-700" oninput="updateMatrixSim()">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Prediction Output Box -->
+                        <div class="mt-4 p-4 rounded-xl bg-brand-50 dark:bg-brand-900/30 border border-brand-200 dark:border-brand-800/50 flex items-center justify-between">
+                            <div>
+                                <span class="block text-xs uppercase font-bold text-brand-700 dark:text-brand-300">Predicted Rating ($\hat{r}_{ui}$)</span>
+                                <span class="text-[11px] text-slate-500 dark:text-slate-400 font-mono">$$\hat{r}_{ui} = (0.80 \times 1.20) + (0.30 \times -0.50) = 0.81$$</span>
+                            </div>
+                            <div class="text-right">
+                                <span id="sim-predicted-rating" class="text-3xl font-extrabold text-brand-600 dark:text-brand-400 font-mono">0.81</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Python Code Lab Tabs -->
+                    <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-3">
+                            <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                <i class="fa-brands fa-python text-emerald-500"></i> Python Code Implementations
+                            </h3>
+                            <div class="flex space-x-2">
+                                <button onclick="showCodeTab('svd')" id="code-btn-svd" class="px-3 py-1 text-xs font-semibold rounded-lg bg-brand-500 text-white">Scipy `svds`</button>
+                                <button onclick="showCodeTab('sgd')" id="code-btn-sgd" class="px-3 py-1 text-xs font-semibold rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">SGD Vectorized</button>
+                            </div>
+                        </div>
+
+                        <!-- SVD Code Box -->
+                        <div id="code-block-svd" class="bg-slate-900 text-slate-200 p-4 rounded-xl font-mono text-xs overflow-x-auto space-y-2">
+                            <pre><code><span class="text-purple-400">from</span> scipy.sparse.linalg <span class="text-purple-400">import</span> svds
+<span class="text-purple-400">from</span> scipy.sparse <span class="text-purple-400">import</span> csr_matrix
+
+<span class="text-slate-500"># 1. Pivot ratings into sparse matrix</span>
+pivot_df = ratings_df.pivot(index=<span class="text-emerald-300">'UserID'</span>, columns=<span class="text-emerald-300">'MovieID'</span>, values=<span class="text-emerald-300">'Rating'</span>).fillna(<span class="text-cyan-400">0</span>)
+R_sparse = csr_matrix(pivot_df.values)
+
+<span class="text-slate-500"># 2. Compute truncated SVD (k latent factors)</span>
+U, sigma, Vt = svds(R_sparse, k=<span class="text-cyan-400">20</span>)
+Sigma_diag = np.diag(sigma)
+
+<span class="text-slate-500"># 3. Reconstruct full predicted rating matrix</span>
+predicted_ratings = np.dot(np.dot(U, Sigma_diag), Vt)
+predicted_df = pd.DataFrame(predicted_ratings, index=pivot_df.index, columns=pivot_df.columns)</code></pre>
+                        </div>
+
+                        <!-- SGD Code Box (Hidden by default) -->
+                        <div id="code-block-sgd" class="hidden bg-slate-900 text-slate-200 p-4 rounded-xl font-mono text-xs overflow-x-auto space-y-2">
+                            <pre><code><span class="text-purple-400">def</span> <span class="text-blue-400">matrix_factorization_sgd</span>(ratings_df, n_factors=<span class="text-cyan-400">10</span>, lr=<span class="text-cyan-400">0.01</span>, reg=<span class="text-cyan-400">0.02</span>, epochs=<span class="text-cyan-400">50</span>):
+    <span class="text-slate-500"># Initialize random latent factor matrices P and W</span>
+    P = np.random.normal(scale=<span class="text-cyan-400">1./n_factors</span>, size=(n_users, n_factors))
+    W = np.random.normal(scale=<span class="text-cyan-400">1./n_factors</span>, size=(n_factors, n_items))
+    
+    <span class="text-purple-400">for</span> epoch <span class="text-purple-400">in</span> range(epochs):
+        <span class="text-purple-400">for</span> u, i, r <span class="text-purple-400">in</span> ratings_tuples:
+            err = r - np.dot(P[u, :], W[:, i])
+            <span class="text-slate-500"># Gradient update with L2 regularization</span>
+            P[u, :] += lr * (err * W[:, i] - reg * P[u, :])
+            W[:, i] += lr * (err * P[u, :] - reg * W[:, i])
+            
+    <span class="text-purple-400">return</span> P, W</code></pre>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Column 3: RMSE vs Factors Explorer & Interactive Tools -->
+                <div class="space-y-6">
+                    <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                            <i class="fa-solid fa-chart-line text-amber-500"></i> Tuning Latent Factors ($k$)
+                        </h3>
+                        <p class="text-xs text-slate-600 dark:text-slate-300">
+                            Select number of factors $k$ to observe trade-offs between reconstruction error (RMSE) and model complexity / overfitting:
+                        </p>
+
+                        <div class="space-y-3 text-xs">
+                            <div>
+                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Select Latent Factors ($k$)</label>
+                                <select id="k-factor-select" class="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 font-mono" onchange="updateFactorCurve()">
+                                    <option value="2">k = 2 (Underfitting, high bias)</option>
+                                    <option value="10">k = 10 (Fast baseline)</option>
+                                    <option value="20" selected>k = 20 (Optimal balance)</option>
+                                    <option value="50">k = 50 (Slight overfitting risk)</option>
+                                    <option value="150">k = 150 (High complexity, slow)</option>
+                                </select>
+                            </div>
+
+                            <!-- Dynamic Metric Cards -->
+                            <div class="p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl space-y-2">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-slate-500 dark:text-slate-400">Test RMSE:</span>
+                                    <span id="k-rmse-val" class="font-mono font-bold text-emerald-600 dark:text-emerald-400">0.8724</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-slate-500 dark:text-slate-400">Params per User:</span>
+                                    <span id="k-params-val" class="font-mono font-bold text-slate-700 dark:text-slate-200">20 values</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-slate-500 dark:text-slate-400">Overfitting Risk:</span>
+                                    <span id="k-risk-val" class="font-bold text-emerald-500">Low</span>
+                                </div>
+                            </div>
+
+                            <p id="k-feedback-text" class="text-[11px] text-slate-500 dark:text-slate-400 italic">
+                                Note: Smallest RMSE on train does not always yield best test performance. "Suitable" $k$ balances computational cost and generalization.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 py-4 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500 dark:text-slate-400">
+            Recommender Systems Lecture Study Guide • AI Data Factory (OPA AUEB)
+        </div>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- DATA STRUCTURES ---
+
+        // Flashcards Dataset (Using String.raw to protect LaTeX backslashes)
+        const flashcardsData = [
+            {
+                id: 1,
+                tag: "Evaluation",
+                category: "evaluation",
+                question: String.raw`How is a dataset split into train and test sets to evaluate recommender systems?`,
+                answer: String.raw`Datasets can be split either by user interaction timestamp (temporal split, placing a user's last $k$ ratings in test) or by random partitioning (e.g. 80% train / 20% test). System designers must also decide whether test sets allow unseen users.`,
+                source: "Slide 3"
+            },
+            {
+                id: 2,
+                tag: "Matrix Factorization",
+                category: "svd",
+                question: String.raw`What is the core intuition behind Matrix Factorization in Collaborative Filtering?`,
+                answer: String.raw`It decomposes the user-item interaction matrix into two lower-rank matrices representing latent characteristics (e.g. genre preference, director style). User ratings are modeled as dot products of user preference vectors and item characteristic vectors.`,
+                source: "Slide 5"
+            },
+            {
+                id: 3,
+                tag: "Matrix Factorization",
+                category: "svd",
+                question: String.raw`What is the mathematical formulation for predicted rating $r_{ij}$ in Matrix Factorization?`,
+                answer: String.raw`The predicted rating of user $i$ for movie $j$ with $k$ latent factors is: $r_{ij} = \sum_{l=1}^{k} pr_{il} w_{lj} = \mathbf{p}_i^T \mathbf{w}_j$.`,
+                source: "Slide 6"
+            },
+            {
+                id: 4,
+                tag: "SVD & Maths",
+                category: "svd",
+                question: String.raw`What is Singular Value Decomposition (SVD) and its 3 component matrices?`,
+                answer: String.raw`SVD decomposes a matrix $A$ into $A = U \Sigma V^T$, where $U$ contains left singular vectors (user concepts), $\Sigma$ contains diagonal singular values, and $V^T$ contains right singular vectors (item concepts).`,
+                source: "Slide 7"
+            },
+            {
+                id: 5,
+                tag: "SVD & Maths",
+                category: "svd",
+                question: String.raw`Why does standard linear algebra SVD fail when applied directly to sparse rating matrices?`,
+                answer: String.raw`Standard SVD requires full dense matrices. Imputing missing ratings with 0 or mean values causes SVD to learn and fit noise rather than genuine preferences, causing catastrophic overfitting on unseen data.`,
+                source: "Slide 11"
+            },
+            {
+                id: 6,
+                tag: "SGD & Optimization",
+                category: "sgd",
+                question: String.raw`How does Stochastic Gradient Descent (SGD) solve matrix factorization on sparse data?`,
+                answer: String.raw`SGD initializes user preference ($pr_{il}$) and movie weight ($w_{lj}$) factors randomly and iteratively updates them ONLY for known ratings to minimize squared prediction error: $e_{ij} = r_{ij} - \mathbf{p}_i^T \mathbf{w}_j$.`,
+                source: "Slide 12"
+            },
+            {
+                id: 7,
+                tag: "SGD & Optimization",
+                category: "sgd",
+                question: String.raw`What are the parameter update equations for SGD without regularization?`,
+                answer: String.raw`$pr_{il}^{new} = pr_{il}^{old} + \gamma \cdot e_{ij} \cdot w_{lj}^{old}$ and $w_{lj}^{new} = w_{lj}^{old} + \gamma \cdot e_{ij} \cdot pr_{il}^{old}$, where $e_{ij} = r_{ij} - \hat{r}_{ij}$.`,
+                source: "Slide 12"
+            },
+            {
+                id: 8,
+                tag: "SGD & Optimization",
+                category: "sgd",
+                question: String.raw`Why is L2 regularization added to the SGD update rules?`,
+                answer: String.raw`Regularization penalizes large magnitude weights (via $-\lambda \mathbf{p}_i$ and $-\lambda \mathbf{w}_j$), preventing the model from overfitting to noisy observed ratings and improving test set generalization.`,
+                source: "Notebook III"
+            },
+            {
+                id: 9,
+                tag: "Evaluation",
+                category: "evaluation",
+                question: String.raw`How do you choose the optimal number of latent factors $k$?`,
+                answer: String.raw`By plotting RMSE vs. factors $k$ on validation data. Small $k$ risks underfitting, while large $k$ increases memory/computation and risks overfitting. The suitable $k$ balances accuracy and complexity.`,
+                source: "Slide 9"
+            },
+            {
+                id: 10,
+                tag: "Interpretation",
+                category: "evaluation",
+                question: String.raw`How can latent factor vectors ($V^T$) be interpreted semantically?`,
+                answer: String.raw`By averaging rows of $V^T$ corresponding to movies in each genre to create a genre vector in latent space, or by running K-Means clustering on $V^T$ combined with tags to group similar movie archetypes.`,
+                source: "Slide 10 & Notebook II"
+            }
+        ];
+
+        // Quiz Questions Dataset (Using String.raw)
+        const quizData = [
+            {
+                question: String.raw`In standard SVD linear algebra decomposition $A = U \Sigma V^T$, what does matrix $V^T$ represent?`,
+                options: [
+                    String.raw`User preferences over latent factors`, 
+                    String.raw`Diagonal singular values`, 
+                    String.raw`Item/movie representations in the latent factor space`, 
+                    String.raw`The original dense ratings matrix`
+                ],
+                answerIndex: 2,
+                explanation: String.raw`In SVD decomposition for recommender systems, $U$ maps users to latent space, $\Sigma$ holds factor strengths, and $V^T$ maps items/movies to latent factors.`
+            },
+            {
+                question: String.raw`Why is filling missing ratings with zeros before applying standard SVD problematic?`,
+                options: [
+                    String.raw`Zeros make matrix multiplication computationally impossible`, 
+                    String.raw`The model fits artificial zeroes (learning noise) rather than true preferences`, 
+                    String.raw`Standard SVD cannot process zero values`, 
+                    String.raw`It causes infinite learning rate explosion`
+                ],
+                answerIndex: 1,
+                explanation: String.raw`Imputing zeros turns unobserved user-item pairs into artificial low ratings, forcing standard SVD to fit noise and severely underperform on unseen test data.`
+            },
+            {
+                question: String.raw`What is the update equation for item factor $w_{lj}$ in SGD given error $e_{ij} = r_{ij} - \hat{r}_{ij}$ and learning rate $\gamma$?`,
+                options: [
+                    String.raw`$w_{lj}^{new} = w_{lj}^{old} + \gamma \cdot e_{ij} \cdot pr_{il}^{old}$`, 
+                    String.raw`$w_{lj}^{new} = w_{lj}^{old} - \gamma \cdot r_{ij} \cdot w_{lj}^{old}$`, 
+                    String.raw`$w_{lj}^{new} = e_{ij}^{2} \cdot pr_{il}^{old}$`, 
+                    String.raw`$w_{lj}^{new} = w_{lj}^{old} + \gamma \cdot e_{ij} \cdot w_{lj}^{old}$`
+                ],
+                answerIndex: 0,
+                explanation: String.raw`The partial derivative of squared error with respect to item weight $w_{lj}$ yields an update proportional to the user factor $pr_{il}$ multiplied by error $e_{ij}$.`
+            },
+            {
+                question: String.raw`When selecting the number of latent factors $k$, why might a system designer NOT choose the factor count with the absolute minimum training error?`,
+                options: [
+                    String.raw`Higher factors always reduce inference latency`, 
+                    String.raw`Very high $k$ may overfit training data and increase computational/memory overhead`, 
+                    String.raw`Training error is mathematically unrelated to prediction accuracy`, 
+                    String.raw`Matrices with $k > 10$ cannot be factorized`
+                ],
+                answerIndex: 1,
+                explanation: String.raw`As slide 9 highlights, 'suitable' factor selection balances error reduction against computational cost and overfitting risks on unseen test data.`
+            },
+            {
+                question: String.raw`How can we calculate a vector representation of an entire movie genre in latent factor space?`,
+                options: [
+                    String.raw`By summing all user ratings for that genre`, 
+                    String.raw`By averaging the corresponding rows of matrix $V^T$ for all movies belonging to that genre`, 
+                    String.raw`By multiplying matrix $U$ by total genre counts`, 
+                    String.raw`By taking the inverse of the singular value matrix $\Sigma$`
+                ],
+                answerIndex: 1,
+                explanation: String.raw`Slide 10 details selecting rows of $V^T$ corresponding to movies in a given genre and taking their column-wise average to get a single latent vector per genre.`
+            }
+        ];
+
+        // --- STATE MANAGEMENT ---
+        let currentDeck = [...flashcardsData];
+        let currentCardIndex = 0;
+        let isCardFlipped = false;
+        let masteredCards = new Set();
+
+        let currentQuizIndex = 0;
+        let quizScore = 0;
+        let quizAnswers = new Array(quizData.length).fill(null);
+
+
+        // --- TAB SWITCHING ---
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('text-brand-600', 'dark:text-brand-400', 'bg-brand-50', 'dark:bg-brand-900/30');
+                el.classList.add('text-slate-600', 'dark:text-slate-400');
+            });
+
+            document.getElementById(`content-${tabId}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`tab-${tabId}`);
+            activeBtn.classList.add('text-brand-600', 'dark:text-brand-400', 'bg-brand-50', 'dark:bg-brand-900/30');
+            activeBtn.classList.remove('text-slate-600', 'dark:text-slate-400');
+        }
+
+
+        // --- FLASHCARD LOGIC ---
+        function updateCardDisplay() {
+            if (currentDeck.length === 0) return;
+            const card = currentDeck[currentCardIndex];
+            
+            // Ensure card is un-flipped when changing
+            const cardEl = document.getElementById('flashcard-element');
+            cardEl.classList.remove('rotate-y-180');
+            isCardFlipped = false;
+
+            setTimeout(() => {
+                document.getElementById('card-tag').innerText = card.tag;
+                // Use innerHTML instead of innerText to ensure spaces and MathJax formatting are not collapsed
+                document.getElementById('card-question').innerHTML = card.question;
+                document.getElementById('card-answer').innerHTML = card.answer;
+                document.getElementById('card-source').innerText = `Source: ${card.source}`;
+                document.getElementById('card-counter').innerText = `${currentCardIndex + 1} / ${currentDeck.length}`;
+                if (window.MathJax) {
+                    MathJax.typesetPromise();
+                }
+            }, 150);
+        }
+
+        function flipCurrentCard() {
+            const cardEl = document.getElementById('flashcard-element');
+            isCardFlipped = !isCardFlipped;
+            if (isCardFlipped) {
+                cardEl.classList.add('rotate-y-180');
+            } else {
+                cardEl.classList.remove('rotate-y-180');
+            }
+        }
+
+        function nextCard() {
+            if (currentDeck.length === 0) return;
+            currentCardIndex = (currentCardIndex + 1) % currentDeck.length;
+            updateCardDisplay();
+        }
+
+        function prevCard() {
+            if (currentDeck.length === 0) return;
+            currentCardIndex = (currentCardIndex - 1 + currentDeck.length) % currentDeck.length;
+            updateCardDisplay();
+        }
+
+        function filterFlashcards(cat) {
+            document.querySelectorAll('.fc-filter-btn').forEach(btn => {
+                btn.classList.remove('bg-brand-500', 'text-white');
+                btn.classList.add('bg-slate-100', 'dark:bg-slate-700', 'text-slate-600', 'dark:text-slate-300');
+            });
+            event.target.classList.add('bg-brand-500', 'text-white');
+
+            if (cat === 'all') {
+                currentDeck = [...flashcardsData];
+            } else {
+                currentDeck = flashcardsData.filter(c => c.category === cat);
+            }
+            currentCardIndex = 0;
+            updateCardDisplay();
+        }
+
+        function shuffleFlashcards() {
+            for (let i = currentDeck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [currentDeck[i], currentDeck[j]] = [currentDeck[j], currentDeck[i]];
+            }
+            currentCardIndex = 0;
+            updateCardDisplay();
+        }
+
+        function markCardMastery(isMastered) {
+            const card = currentDeck[currentCardIndex];
+            if (isMastered) {
+                masteredCards.add(card.id);
+            } else {
+                masteredCards.delete(card.id);
+            }
+            updateMasteryProgress();
+            nextCard();
+        }
+
+        function updateMasteryProgress() {
+            const count = masteredCards.size;
+            const pct = (count / flashcardsData.length) * 100;
+            document.getElementById('flashcard-progress-bar').style.width = `${pct}%`;
+            document.getElementById('flashcard-progress-text').innerText = `${count}/${flashcardsData.length}`;
+        }
+
+
+        // --- QUIZ LOGIC ---
+        function renderQuizQuestion() {
+            const q = quizData[currentQuizIndex];
+            document.getElementById('quiz-current-num').innerText = currentQuizIndex + 1;
+            document.getElementById('quiz-total-num').innerText = quizData.length;
+            document.getElementById('quiz-question-box').innerHTML = q.question;
+
+            const optionsBox = document.getElementById('quiz-options-box');
+            optionsBox.innerHTML = '';
+
+            const explanationBox = document.getElementById('quiz-explanation-box');
+            explanationBox.classList.add('hidden');
+
+            const nextBtn = document.getElementById('quiz-next-btn');
+            nextBtn.classList.add('hidden');
+
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-sm font-medium flex items-center justify-between";
+                btn.innerHTML = `<span>${String.fromCharCode(65 + idx)}. ${opt}</span> <i class="quiz-icon fa-regular fa-circle text-slate-400"></i>`;
+                btn.onclick = () => selectQuizOption(idx);
+                optionsBox.appendChild(btn);
+            });
+
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        function selectQuizOption(optIdx) {
+            const q = quizData[currentQuizIndex];
+            const optionsBox = document.getElementById('quiz-options-box');
+            const buttons = optionsBox.querySelectorAll('button');
+
+            // Disable all buttons
+            buttons.forEach(btn => btn.disabled = true);
+
+            const isCorrect = optIdx === q.answerIndex;
+            if (isCorrect) quizScore++;
+
+            // Highlight selected & correct
+            buttons[optIdx].classList.remove('border-slate-200', 'dark:border-slate-700');
+            if (isCorrect) {
+                buttons[optIdx].classList.add('bg-emerald-50', 'dark:bg-emerald-900/30', 'border-emerald-500', 'text-emerald-800', 'dark:text-emerald-300');
+                buttons[optIdx].querySelector('.quiz-icon').className = "fa-solid fa-circle-check text-emerald-500";
+            } else {
+                buttons[optIdx].classList.add('bg-rose-50', 'dark:bg-rose-900/30', 'border-rose-500', 'text-rose-800', 'dark:text-rose-300');
+                buttons[optIdx].querySelector('.quiz-icon').className = "fa-solid fa-circle-xmark text-rose-500";
+
+                // Highlight correct answer
+                buttons[q.answerIndex].classList.add('bg-emerald-50', 'dark:bg-emerald-900/30', 'border-emerald-500', 'text-emerald-800', 'dark:text-emerald-300');
+            }
+
+            // Show explanation
+            const expBox = document.getElementById('quiz-explanation-box');
+            expBox.innerHTML = `<strong>${isCorrect ? 'Correct!' : 'Incorrect.'}</strong> ${q.explanation}`;
+            expBox.className = `p-4 rounded-xl text-xs leading-relaxed border ${isCorrect ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 text-emerald-800 dark:text-emerald-200' : 'bg-rose-50 dark:bg-rose-900/20 border-rose-200 text-rose-800 dark:text-rose-200'}`;
+            expBox.classList.remove('hidden');
+
+            document.getElementById('quiz-next-btn').classList.remove('hidden');
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        function nextQuizQuestion() {
+            currentQuizIndex++;
+            if (currentQuizIndex < quizData.length) {
+                renderQuizQuestion();
+            } else {
+                showQuizResults();
+            }
+        }
+
+        function showQuizResults() {
+            document.getElementById('quiz-container').classList.add('hidden');
+            const resultsBox = document.getElementById('quiz-results-box');
+            resultsBox.classList.remove('hidden');
+
+            document.getElementById('quiz-final-score').innerText = `${quizScore} / ${quizData.length}`;
+            
+            const badge = document.getElementById('quiz-badge-text');
+            const feedback = document.getElementById('quiz-summary-feedback');
+
+            const scorePct = (quizScore / quizData.length) * 100;
+            if (scorePct >= 80) {
+                badge.innerText = "Mastery Level: Factorization Specialist";
+                badge.className = "text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400";
+                feedback.innerText = "Outstanding understanding of matrix decomposition, SGD parameter updates, regularization, and latent factor semantics!";
+            } else {
+                badge.innerText = "Mastery Level: Developing Novice";
+                badge.className = "text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400";
+                feedback.innerText = "Review the slides on SVD limitations on sparse matrices and the SGD update rules with L2 regularization.";
+            }
+
+            // Update header quiz badge
+            const badgeHeader = document.getElementById('quiz-score-badge');
+            badgeHeader.innerText = `${scorePct}%`;
+            badgeHeader.className = scorePct >= 80 ? "font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300" : "font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-300";
+        }
+
+        function resetQuiz() {
+            currentQuizIndex = 0;
+            quizScore = 0;
+            document.getElementById('quiz-results-box').classList.add('hidden');
+            document.getElementById('quiz-container').classList.remove('hidden');
+            renderQuizQuestion();
+        }
+
+
+        // --- MATRIX LAB & SIMULATION LOGIC ---
+        function updateMatrixSim() {
+            const pu1 = parseFloat(document.getElementById('slider-pu1').value);
+            const pu2 = parseFloat(document.getElementById('slider-pu2').value);
+            const wi1 = parseFloat(document.getElementById('slider-wi1').value);
+            const wi2 = parseFloat(document.getElementById('slider-wi2').value);
+
+            document.getElementById('val-pu1').innerText = pu1.toFixed(2);
+            document.getElementById('val-pu2').innerText = pu2.toFixed(2);
+            document.getElementById('val-wi1').innerText = wi1.toFixed(2);
+            document.getElementById('val-wi2').innerText = wi2.toFixed(2);
+
+            const pred = (pu1 * wi1) + (pu2 * wi2);
+            document.getElementById('sim-predicted-rating').innerText = pred.toFixed(2);
+        }
+
+        function showCodeTab(type) {
+            if (type === 'svd') {
+                document.getElementById('code-block-svd').classList.remove('hidden');
+                document.getElementById('code-block-sgd').classList.add('hidden');
+                document.getElementById('code-btn-svd').className = "px-3 py-1 text-xs font-semibold rounded-lg bg-brand-500 text-white";
+                document.getElementById('code-btn-sgd').className = "px-3 py-1 text-xs font-semibold rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300";
+            } else {
+                document.getElementById('code-block-svd').classList.add('hidden');
+                document.getElementById('code-block-sgd').classList.remove('hidden');
+                document.getElementById('code-btn-sgd').className = "px-3 py-1 text-xs font-semibold rounded-lg bg-brand-500 text-white";
+                document.getElementById('code-btn-svd').className = "px-3 py-1 text-xs font-semibold rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300";
+            }
+        }
+
+        const factorPresets = {
+            "2": { rmse: "0.9841", params: "2 values", risk: "Underfitting", riskClass: "text-amber-500" },
+            "10": { rmse: "0.8912", params: "10 values", risk: "Low", riskClass: "text-emerald-500" },
+            "20": { rmse: "0.8724", params: "20 values", risk: "Optimal", riskClass: "text-emerald-500" },
+            "50": { rmse: "0.8610", params: "50 values", risk: "Moderate", riskClass: "text-amber-500" },
+            "150": { rmse: "0.8495", params: "150 values", risk: "High Overfitting", riskClass: "text-rose-500" }
+        };
+
+        function updateFactorCurve() {
+            const k = document.getElementById('k-factor-select').value;
+            const info = factorPresets[k];
+            document.getElementById('k-rmse-val').innerText = info.rmse;
+            document.getElementById('k-params-val').innerText = info.params;
+            const riskEl = document.getElementById('k-risk-val');
+            riskEl.innerText = info.risk;
+            riskEl.className = `font-bold ${info.riskClass}`;
+        }
+
+
+        // --- THEME & KEYBOARD LISTENERS ---
+        document.getElementById('theme-toggle').addEventListener('click', () => {
+            const isDark = document.documentElement.classList.toggle('dark');
+            document.getElementById('theme-toggle-icon').className = isDark ? "fa-solid fa-sun" : "fa-solid fa-moon";
+        });
+
+        document.addEventListener('keydown', (e) => {
+            const activeTab = document.querySelector('.tab-content:not(.hidden)').id;
+            if (activeTab === 'content-flashcards') {
+                if (e.code === 'Space') {
+                    e.preventDefault();
+                    flipCurrentCard();
+                } else if (e.code === 'ArrowRight') {
+                    nextCard();
+                } else if (e.code === 'ArrowLeft') {
+                    prevCard();
+                }
+            }
+        });
+
+        // Initialize state
+        window.addEventListener('DOMContentLoaded', () => {
+            updateCardDisplay();
+            renderQuizQuestion();
+            updateMatrixSim();
+        });
+    </script>
+</body>
+</html>

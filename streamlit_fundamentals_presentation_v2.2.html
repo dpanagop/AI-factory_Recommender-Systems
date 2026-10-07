@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Streamlit Basic Commands & Functionality</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Custom Styling Rules -->
+  <style>
+    /* Base Typography & Color Palette */
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background-color: #111827;
+      color: #F3F4F6;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+
+    code, pre {
+      font-family: 'Courier New', Courier, monospace !important;
+      color: #FFFF00 !important; /* Courier New Yellow */
+    }
+
+    /* 16:9 Widescreen Aspect Ratio Container */
+    .aspect-16-9 {
+      aspect-ratio: 16 / 9;
+    }
+
+    /* Dark Red Rules for Title Separators */
+    .red-title-rule {
+      border: none;
+      height: 2px;
+      background-color: #8B0000;
+      margin-top: 0.5rem;
+      margin-bottom: 1.25rem;
+      width: 100%;
+    }
+
+    /* Slide Transition Visibility */
+    .slide {
+      display: none;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    .slide.active {
+      display: flex;
+    }
+
+    /* Specific Slide Theme Backgrounds */
+    .bg-content-navy {
+      background-color: #222A35;
+    }
+
+    .bg-question-black {
+      background-color: #000000;
+    }
+
+    /* Custom Scrollbar for Code Preview Windows */
+    pre::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    pre::-webkit-scrollbar-thumb {
+      background: #4B5563;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-2 sm:p-6 bg-slate-950 text-slate-100 select-none">
+
+  <!-- Main Presentation Shell (16:9 Widescreen Frame) -->
+  <div class="relative w-full max-w-6xl aspect-16-9 rounded-xl shadow-2xl overflow-hidden border border-slate-700 bg-[#222A35] flex flex-col justify-between">
+    
+    <!-- Slides Viewport -->
+    <div id="slides-container" class="relative flex-1 w-full h-full overflow-hidden">
+
+      <!-- ==========================================
+           SLIDE 1: Title Slide
+      =========================================== -->
+      <div class="slide active bg-content-navy flex-col justify-between p-8 sm:p-12 text-white">
+        <!-- Header / Logo Area -->
+        <div class="flex justify-between items-center w-full relative z-10">
+          <span class="text-xs font-bold tracking-widest uppercase bg-red-900/40 text-red-300 border border-[#8B0000] px-3 py-1 rounded-full">
+            Python Web Applications
+          </span>
+          <!-- Logo with SVG Fallback -->
+          <div class="flex items-center space-x-2">
+            <img src="OPA_data_factory.png" alt="OPA Data Factory" class="h-10 w-auto object-contain" onerror="this.style.display='none'; document.getElementById('logo-fallback-1').classList.remove('hidden');" />
+            <div id="logo-fallback-1" class="hidden flex items-center space-x-2 bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-600">
+              <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+              </svg>
+              <span class="text-xs font-bold tracking-wider text-slate-200">OPA DATA FACTORY</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Main Title Content -->
+        <div class="my-auto">
+          <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-white mb-2">
+            Streamlit Basic Commands & Functionality
+          </h1>
+          <hr class="red-title-rule" />
+          <p class="text-base sm:text-xl text-slate-300 font-normal max-w-3xl leading-relaxed">
+            Building interactive data apps entirely in pure Python — fast, responsive, and front-end free.
+          </p>
+        </div>
+
+        <!-- Presenter Meta -->
+        <div class="flex justify-between items-end text-xs text-slate-400 border-t border-slate-700/60 pt-4">
+          <div>
+            <p class="font-semibold text-slate-200 text-sm">Data Engineering & Analytics Series</p>
+            <p>Interactive Presentation Module 01</p>
+			<p><a href="https://www.linkedin.com/in/dpanagopoulos/" target="_blank" class="flex items-center gap-2 text-cyan-300 underline">Limkedin</a></p>
+          </div>
+          <div class="text-right">
+            <p class="text-slate-300">Python 3.9+ | Streamlit v1.30+</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==========================================
+           SLIDE 2: Author & Overview Slide
+      =========================================== -->
+      <div class="slide bg-content-navy flex-col justify-between p-8 sm:p-12 text-white">
+        <div>
+          <div class="flex justify-between items-center">
+            <h2 class="text-2xl sm:text-3xl font-bold text-white">Speaker Overview & Agenda</h2>
+            <!-- Logo Fallback -->
+            <img src="OPA_data_factory.png" alt="OPA Data Factory" class="h-8 w-auto" onerror="this.style.display='none'; document.getElementById('logo-fallback-2').classList.remove('hidden');" />
+            <div id="logo-fallback-2" class="hidden text-xs text-slate-400 font-semibold">OPA DATA FACTORY</div>
+          </div>
+          <hr class="red-title-rule" />
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
+            <!-- Agenda Item 1 -->
+            <div class="bg-slate-800/60 p-4 rounded-lg border border-slate-700">
+              <span class="text-red-400 font-mono text-sm block mb-1">01 / FOUNDATIONS</span>
+              <h3 class="text-lg font-bold text-slate-100 mb-2">Architecture & Execution</h3>
+              <p class="text-xs text-slate-300 leading-relaxed">
+                Understand how Streamlit re-runs scripts top-to-bottom on interaction and eliminates web server boilerplate.
+              </p>
+            </div>
+            <!-- Agenda Item 2 -->
+            <div class="bg-slate-800/60 p-4 rounded-lg border border-slate-700">
+              <span class="text-red-400 font-mono text-sm block mb-1">02 / CORE API</span>
+              <h3 class="text-lg font-bold text-slate-100 mb-2">Display & Input Widgets</h3>
+              <p class="text-xs text-slate-300 leading-relaxed">
+                Explore display commands (`st.write`, dataframes, charts) and input widgets (`st.slider`, buttons, text inputs).
+              </p>
+            </div>
+            <!-- Agenda Item 3 -->
+            <div class="bg-slate-800/60 p-4 rounded-lg border border-slate-700">
+              <span class="text-red-400 font-mono text-sm block mb-1">03 / ADVANCED</span>
+              <h3 class="text-lg font-bold text-slate-100 mb-2">Layouts, State & Caching</h3>
+              <p class="text-xs text-slate-300 leading-relaxed">
+                Master columns, sidebars, `st.session_state` persistence, and performance caching with `@st.cache_data`.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-slate-900/50 p-3 rounded-md border border-slate-700/50 flex items-center justify-between text-xs text-slate-300">
+          <span><strong>Presenter Goal:</strong> Enable rapid prototyping of data applications without HTML/CSS/JS complexity.</span>
+          <span class="text-red-400 font-semibold">15 Slide Walkthrough</span>
+        </div>
+      </div>
+
+      <!-- ==========================================
+           SLIDE 3: Question Slide 1 (FIXED LAYOUT)
+      =========================================== -->
+      <div class="slide bg-question-black flex-col justify-start items-center text-center relative h-full w-full p-8 sm:p-12 overflow-hidden">
+        <!-- Question Content Box (Top-aligned, z-10) -->
+        <div class="mt-8 mb-auto relative z-10 max-w-4xl w-full flex flex-col items-center">
+          <div class="inline-flex items-center space-x-2 bg-red-950/80 border border-[#8B0000] px-4 py-1.5 rounded-full mb-4">
+            <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+            <span class="text-xs font-bold text-red-300 uppercase tracking-wider">Concept Discussion #1</span>
+          </div>
+
+          <h2 class="text-2xl sm:text-4xl font-extrabold text-white leading-tight mb-4">
+            Why is pure Python web development usually complex, and how does Streamlit simplify it?
+          </h2>
+
+          <hr class="red-title-rule max-w-md mx-auto my-4" />
+
+          <div class="bg-slate-900/90 border border-slate-800 p-6 rounded-xl max-w-2xl text-left text-sm text-slate-300 shadow-xl space-y-3">
+            <p class="text-yellow-300 font-semibold flex items-center gap-2">
+              <svg class="w-4 h-4 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              Key Discussion Points:
+            </p>
+            <ul class="list-disc list-inside space-y-1 text-xs text-slate-300">
+              <li>Traditional stack requires Flask/FastAPI + HTML templates + JavaScript + CSS styling.</li>
+              <li>Streamlit converts plain Python data scripts into fully reactive web applications.</li>
+              <li>No REST APIs, route controllers, or DOM manipulation required.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Torn Paper SVG Edge (Restricted to bottom-0, h-16, z-0 rising bottom-left to right) -->
+        <div class="absolute bottom-0 left-0 w-full h-16 z-0 pointer-events-none overflow-hidden">
+          <svg class="w-full h-full" viewBox="0 0 1200 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Torn paper polygon with jagged edge subtly rising from bottom-left (y=80) to bottom-right (y=40) -->
+            <path d="M0,120 L0,85 
+                     L40,78 L80,82 L120,75 L160,80 L200,72 L240,76 L280,68 
+                     L320,72 L360,65 L400,70 L440,62 L480,66 L520,58 L560,62 
+                     L600,54 L640,58 L680,50 L720,55 L760,48 L800,52 L840,44 
+                     L880,48 L920,40 L960,45 L1000,38 L1040,42 L1080,35 L1120,40 
+                     L1160,32 L1200,36 L1200,120 Z" 
+                  fill="#222A35" opacity="0.95"/>
+            <path d="M0,85 
+                     L40,78 L80,82 L120,75 L160,80 L200,72 L240,76 L280,68 
+                     L320,72 L360,65 L400,70 L440,62 L480,66 L520,58 L560,62 
+                     L600,54 L640,58 L680,50 L720,55 L760,48 L800,52 L840,44 
+                     L880,48 L920,40 L960,45 L1000,38 L1040,42 L1080,35 L1120,40 
+                     L1160,32 L1200,36" 
+                  fill="none" stroke="#8B0000" stroke-width="2.5"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- ==========================================
+           SLIDE 4: What is Streamlit & Core Architecture
+      =========================================== -->
+      <div class="slide bg-content-navy flex-col justify-between p-8 sm:p-12 text-white">
+        <div>
+          <h2 class="text-2xl sm:text-3xl font-bold text-white">What is Streamlit & Reactive Execution</h2>
+          <hr class="red-title-rule" />
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+            <!-- Left: Principles -->
+            <div class="space-y-3">
+              <div class="bg-slate-800/80 p-4 rounded-lg border-l-4 border-red-700">
+                <h3 class="font-bold text-slate-100 text-sm mb-1">1. Top-to-Bottom Execution</h3>
+                <p class="text-xs text-slate-300">
+                  Every time a user interacts with a slider, button, or text box, Streamlit re-executes the entire Python script from top to bottom.
+                </p>
+              </div>
+              <div class="bg-slate-800/80 p-4 rounded-lg border-l-4 border-yellow-500">
+                <h3 class="font-bold text-slate-100 text-sm mb-1">2. Variables as State</h3>
+                <p class="text-xs text-slate-300">
+                  Widget values act directly as standard Python variables (`x = st.slider(...)`). No event handlers or callback registration required for simple apps.
+                </p>
+              </div>
+              <div class="bg-slate-800/80 p-4 rounded-lg border-l-4 border-blue-500">
+                <h3 class="font-bold text-slate-100 text-sm mb-1">3. Zero Frontend Code</h3>
+                <p class="text-xs text-slate-300">
+                  Widgets rendering, WebSocket syncing, layout formatting, and CSS themes are entirely handled behind the scenes.
+                </p>
+              </div>
+            </div>
+
+            <!-- Right: Diagram Box -->
+            <div class="bg-slate-900/90 p-5 rounded-lg border border-slate-700 flex flex-col justify-between">
+              <div>
+                <span class="text-xs font-mono text-slate-400 block mb-2">// EXECUTION FLOW MODEL</span>
+                <div class="space-y-2 text-xs font-mono">
+                  <div class="bg-slate-800 p-2.5 rounded border border-slate-700 text-center text-slate-200">
+                    User interacts with Widget (e.g., Slider)
+                  </div>
+                  <div class="text-center text-red-400 font-bold">↓ Triggers Script Re-run</div>
+                  <div class="bg-slate-800 p-2.5 rounded border border-slate-700 text-center text-yellow-300">
+                    Python Script runs line 1 → N
+                  </div>
+                  <div class="text-center text-red-400 font-bold">↓ Renders UI Diff</div>
+                  <div class="bg-slate-800 p-2.5 rounded border border-slate-700 text-center text-green-300">
+                    Browser reflects updated outputs
+                  </div>
+                </div>
+              </div>
+              <p class="text-[11px] text-slate-400 mt-3 text-center italic">
+                Optimized by smart virtual DOM diffing over WebSockets.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-xs text-slate-400 flex justify-between border-t border-slate-800 pt-2">
+          <span>Streamlit Basics</span>
+          <span>Slide 4 of 15</span>
+        </div>
+      </div>
+
+      <!-- ==========================================
+           SLIDE 5: Text Elements & Basic Output
+      =========================================== -->
+      <div class="slide bg-content-navy flex-col justify-between p-8 sm:p-12 text-white">
+        <div>
+          <h2 class="text-2xl sm:text-3xl font-bold text-white">Text Display Commands</h2>
+          <hr class="red-title-rule" />
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Left Code Snippet -->
+            <div>
+              <p class="text-xs text-slate-300 mb-2 font-semibold">Python Source (`app.py`):</p>
+              <pre class="bg-slate-950 p-4 rounded-lg border border-slate-800 text-xs leading-relaxed overflow-x-auto"><code>import streamlit as st
+
+st.title("Main Application Title")
+st.header("Section Header")
+st.subheader("Sub-section Header")
+
+st.write("st.write is the Swiss Army knife!")
+st.markdown("Supports **bold**, *italics*, and :rocket: emojis")
+st.caption("Small caption text for footnote notes.")
+st.code("x = [1, 2, 3]", language="python")</code></pre>
+            </div>
+
+            <!-- Right Visual Output Mockup -->
+            <div>
+              <p class="text-xs text-slate-300 mb-2 font-semibold">Rendered Browser Output:</p>
+              <div class="bg-slate-900 border border-slate-700 p-4 rounded-lg text-slate-100 text-xs space-y-2 shadow-inner">
+                <h1 class="text-xl font-black text-white border-b border-slate-800 pb-1">Main Application Title</h1>
+                <h2 class="text-base font-bold text-slate-200">Section Header</h2>
+                <h3 class="text-sm font-semibold text-slate-300">Sub-section Header</h3>
+                <p class="text-slate-300">st.write is the Swiss Army knife!</p>
+                <p class="text-slate-300">Supports <strong class="text-white">bold</strong>, <em>italics</em>, and 🚀 emojis</p>
+                <p class="text-slate-400 text-[10px]">Small caption text for footnote notes.</p>
+                <div class="bg-black/80 p-2 rounded border border-slate-800 font-mono text-yellow-300">
+                  x = [1, 2, 3]
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-xs text-slate-400 flex justify-between border-t border-slate-800 pt-2">
+          <span>Core API / Text & Formatting</span>
+          <span>Slide 5 of 15</span>
+        </div>
+      </div>
+
+      <!-- ==========================================
+           SLIDE 6: Question Slide 2 (FIXED LAYOUT)
+      =========================================== -->
+      <div class="slide bg-question-black flex-col justify-start items-center text-center relative h-full w-full p-8 sm:p-12 overflow-hidden">
+        <!-- Question Content Box (Top-aligned, z-10) -->
+        <div class="mt-8 mb-auto relative z-10 max-w-4xl w-full flex flex-col items-center">
+          <div class="inline-flex items-center space-x-2 bg-red-950/80 border border-[#8B0000] px-4 py-1.5 rounded-full mb-4">
+            <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+            <span class="text-xs font-bold text-red-300 uppercase tracking-wider">Concept Discussion #2</span>
+          </div>
+
+          <h2 class="text-2xl sm:text-4xl font-extrabold text-white leading-tight mb-4">
+            How does Streamlit handle state updates when users interact with widgets like sliders and buttons?
+          </h2>
+
+          <hr class="red-title-rule max-w-md mx-auto my-4" />
+
+          <div class="bg-slate-900/90 border border-slate-800 p-6 rounded-xl max-w-2xl text-left text-sm text-slate-300 shadow-xl space-y-3">
+            <p class="text-yellow-300 font-semibold flex items-center gap-2">
+              <svg class="w-4 h-4 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              Key State Principles:
+            </p>
+            <ul class="list-disc list-inside space-y-1 text-xs text-slate-300">
+              <li>Widget functions return their current front-end value directly into script variables.</li>
+              <li>A widget change triggers a full top-to-bottom re-run with updated return values.</li>
+              <li>Transient values (like `st.button` click status) reset to `False` on the subsequent re-run unless saved to `st.session_state`.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Torn Paper SVG Edge (Restricted to bottom-0, h-16, z-0 rising bottom-left to right) -->
+        <div class="absolute bottom-0 left-0 w-full h-16 z-0 pointer-events-none overflow-hidden">
+          <svg class="w-full h-full" viewBox="0 0 1200 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0,120 L0,85 
+                     L40,78 L80,82 L120,75 L160,80 L200,72 L240,76 L280,68 
+                     L320,72 L360,65 L400,70 L440,62 L480,66 L520,58 L560,62 
+                     L600,54 L640,58 L680,50 L720,55 L760,48 L800,52 L840,44 
+                     L880,48 L920,40 L960,45 L1000,38 L1040,42 L1080,35 L1120,40 
+                     L1160,32 L1200,36 L1200,120 Z" 
+                  fill="#222A35" opacity="0.95"/>
+            <path d="M0,85 
+                     L40,78 L80,82 L120,75 L160,80 L200,72 L240,76 L280,68 
+                     L320,72 L360,65 L400,70 L440,62 L480,66 L520,58 L560,62 
+                     L600,54 L640,58 L680,50 L720,55 L760,48 L800,52 L840,44 
+                     L880,48 L920,40 L960,45 L1000,38 L1040,42 L1080,35 L1120,40 
+                     L1160,32 L1200,36" 
+                  fill="none" stroke="#8B0000" stroke-width="2.5"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- ==========================================
+           SLIDE 7: Interactive Input Widgets
+      =========================================== -->
+      <div class="slide bg-content-navy flex-col justify-between p-8 sm:p-12 text-white">
+        <div>
+          <h2 class="text-2xl sm:text-3xl font-bold text-white">Interactive Input Widgets</h2>
+          <hr class="red-title-rule" />
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Code Column -->
+            <div>
+              <p class="text-xs text-slate-300 mb-2 font-semibold">Python Code Structure:</p>
+              <pre class="bg-slate-950 p-4 rounded-lg border border-slate-800 text-xs leading-relaxed overflow-x-auto"><code>name = st.text_input("Your Name", "Alice")
+age = st.slider("Select Age", 0, 100, 25)
+role = st.selectbox("Role", ["Data Scientist", "Engineer", "Analyst"])
+agree = st.checkbox("I agree to terms")
+
+if st.button("Submit Profile"):
+    st.write(f"Hello {name}, Age {age} ({role})")</code></pre>
+            </div>
+
+            <!-- Interactive Widget Simulation Mockup -->
+            <div>
+              <p class="text-xs text-slate-300 mb-2 font-semibold">Live Simulated Preview:</p>
+              <div class="bg-slate-900 border border-slate-700 p-4 rounded-lg text-xs space-y-3 shadow-inner">
+                <div>
+                  <label class="block text-[11px] font-semibold text-slate-300 mb-1">Your Name</label>
+                  <input id="demo-name" type="text" value="Alice" class="w-full bg-slate-800 border border-slate-600 rounded px-2 py-1 text-white text-xs focus:outline-none focus:border-red-500" oninput="updateSimulatedOutput()" />
+                </div>
+
+                <div>
+                  <div class="flex justify-between text-[11px] text-slate-300 mb-1">
+                    <span>Select Age</span>
+                    <span id="demo-age-val" class="text-yellow-300 font-mono">25</span>
+                  </div>
+                  <input id="demo-age" type="range" min="0" max="100" value="25" class="w-full accent-red-600 cursor-pointer" oninput="updateSimulatedOutput()" />
+                </div>
+
+                <div>
+                  <label class="block text-[11px] font-semibold text-slate-300 mb-1">Role</label>
+                  <select id="demo-role" class="w-full bg-slate-800 border border-slate-600 rounded px-2 py-1 text-white text-xs" onchange="updateSimulatedOutput()">
+                    <option>Data Scientist</option>
+                    <option>Engineer</option>
+                    <option>Analyst</option>
+                  </select>
+                </div>
+
+                <div class="flex items-center space-x-2 pt-1">
+                  <input id="demo-[#agree]" type="checkbox" checked class="rounded accent-red-600" onchange="updateSimulatedOutput()" />
+                  <label class="text-[11px] text-slate-300">I agree to terms</label>
+                </div>
+
+                <div class="pt-2 border-t border-slate-800">
+                  <div id="simulated-result" class="bg-slate-950 p-2.5 rounded border border-slate-800 font-mono text-yellow-300 text-[11px]">
+                    Hello Alice, Age 25 (Data Scientist)
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-xs text-slate-400 flex justify-between border-t border-slate-800 pt-2">
+          <span>Widgets & User Input</span>
+          <span>Slide 7 of 15</span>
+        </div>
+      </div>
+
+      <!-- ==========================================
+           SLIDE 8: Displaying Data & Dataframes
+      =========================================== -->
+      <div class="slide bg-content-navy flex-col justify-between p-8 sm:p-12 text-white">
+        <div>
+          <h2 class="text-2xl sm:text-3xl font-bold text-white">Displaying Data & Metrics</h2>
+          <hr class="red-title-rule" />
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Left Code Snippet -->
+            <div>
+              <p class="text-xs text-slate-300 mb-2 font-semibold">Pandas & Metric Commands:</p>
+              <pre class="bg-slate-950 p-4 rounded-lg border border-slate-800 text-xs leading-relaxed overflow-x-auto"><code>import pandas as pd
+import streamlit as st
+
+df = pd.DataFrame({
+    'Metric': ['Revenue', 'Users', 'Conversion'],
+    'Value': ['$120,000', '14,200', '3.4%']
+})
+
+# Interactive Table with sorting
+st.dataframe(df, use_container_width=True)
+
+# Key KPI Cards
+st.metric(label="Total Revenue", value="$120,000", delta="+12.5%")</code></pre>
+            </div>
+
+            <!-- Right Rendered Preview -->
+            <div>
+              <p class="text-xs text-slate-300 mb-2 font-semibold">Rendered UI Components:</p>
+              <div class="bg-slate-900 border border-slate-700 p-4 rounded-lg space-y-4">
+                <!-- Dataframe Table Mockup -->
+                <div class="overflow-x-auto">
+                  <table class="w-full text-left text-xs border-collapse">
+                    <thead>
+                      <tr class="border-b border-slate-700 bg-slate-800 text-slate-300">
+                        <th class="p-2 font-semibold">#</th>
+                        <th class="p-2 font-semibold">Metric</th>
+                        <th class="p-2 font-semibold">Value</th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-800 font-mono text-slate-200">
+                      <tr><td class="p-2 text-slate-500">0</td><td class="p-2">Revenue</td><td class="p-2 text-yellow-300">$120,000</td></tr>
+                      <tr><td class="p-2 text-slate-500">1</td><td class="p-2">Users</td><td class="p-2 text-yellow-300">14,200</td></tr>
+                      <tr><td class="p-2 text-slate-500">2</td><td class="p-2">Conversion</td><td class="p-2 text-yellow-300">3.4%</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <!-- KPI Metric Card Mockup -->
+                <div class="bg-slate-800/90 p-3 rounded-lg border border-slate-700 max-w-xs">
+                  <span class="text-[11px] text-slate-400 font-medium block">Total Revenue</span>
+                  <div class="flex items-baseline space-x-2 mt-1">
+                    <span class="text-xl font-bold text-white">$120,000</span>
+                    <span class="text-xs font-semibold text-green-400">↑ +12.5%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-xs text-slate-400 flex justify-between border-t border-slate-800 pt-2">
+          <span>Data Displays</span>
+          <span>Slide 8 of 15</span>
+        </div>
+      </div>
+
+      <!-- ==========================================
+           SLIDE 9: Charts & Data Visualization
+      =========================================== -->
+      <div class="slide bg-content-navy flex-col justify-between p-8 sm:p-12 text-white">
+        <div>
+          <h2 class="text-2xl sm:text-3xl font-bold text-white">Charts & Data Visualization</h2>
+          <hr class="red-title-rule" />
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Left: Native vs Library integrations -->
+            <div class="space-y-3">
+              <div class="bg-slate-800/80 p-3 rounded border border-slate-700">
+                <h3 class="font-bold text-yellow-300 text-xs mb-1">Native Quick Charts</h3>
+                <pre class="bg-slate-950 p-2 rounded text-[11px]"><code>st.line_chart(df)
+st.bar_chart(df)
+st.area_chart(df)</code></pre>
+                <p class="text-[11px] text-slate-400 mt-1">Built directly on Vega-Lite for instantaneous quick plots.</p>
+              </div>
+
+              <div class="bg-slate-800/80 p-3 rounded border border-slate-700">
+                <h3 class="font-bold text-yellow-300 text-xs mb-1">Full Plotting Ecosystem Integration</h3>
+                <pre class="bg-slate-950 p-2 rounded text-[11px]"><code>st.pyplot(fig)          # Matplotlib / Seaborn
+st.plotly_chart(fig)    # Interactive Plotly
+st.altair_chart(chart)  # Altair specification
+st.bokeh_chart(fig)     # Bokeh charts</code></pre>
+              </div>
+            </div>
+
+            <!-- Right Visual Bar Chart Mockup -->
+            <div class="bg-slate-900 border border-slate-700 p-4 rounded-lg flex flex-col justify-between">
+              <div class="flex justify-between items-center text-xs text-slate-300 border-b border-slate-800 pb-2">
+                <span class="font-bold">`st.bar_chart(chart_data)`</span>
+                <span class="text-slate-500 font-mono">Vega-Lite Engine</span>
+              </div>
+
+              <!-- Bar chart graphic simulation -->
+              <div class="h-40 flex items-end justify-between space-x-3 px-4 pt-4 border-b border-slate-700">
+                <div class="w-1/5 bg-red-600 rounded-t h-[40%] transition-all hover:bg-red-500 relative group">
+                  <span class="absolute -top-5 left-1/2 -translate-x-1/2 text-[10px] font-mono text-yellow-300 opacity-0 group-hover:opacity-100">40</span>
+                </div>
+                <div class="w-1/5 bg-red-600 rounded-t h-[75%] transition-all hover:bg-red-500 relative group">
+                  <span class="absolute -top-5 left-1/2 -translate-x-1/2 text-[10px] font-mono text-yellow-300 opacity-0 group-hover:opacity-100">75</span>
+                </div>
+                <div class="w-1/5 bg-red-600 rounded-t h-[55%] transition-all hover:bg-red-500 relative group">
+                  <span class="absolute -top-5 left-1/2 -translate-x-1/2 text-[10px] font-mono text-yellow-300 opacity-0 group-hover:opacity-100">55</span>
+                </div>
+                <div class="w-1/5 bg-red-600 rounded-t h-[90%] transition-all hover:bg-red-500 relative group">
+                  <span class="absolute -top-5 left-1/2 -translate-x-1/2 text-[10px] font-mono text-yellow-300 opacity-0 group-hover:opacity-100">90</span>
+                </div>
+                <div class="w-1/5 bg-red-600 rounded-t h-[65%] transition-all hover:bg-red-500 relative group">
+                  <span class="absolute -top-5 left-1/2 -translate-x-1/2 text-[10px] font-mono text-yellow-300 opacity-0 group-hover:opacity-100">65</span>
+                </div>
+              </div>
+              <div class="flex justify-between text-[10px] text-slate-400 font-mono px-4 pt-1">
+                <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-xs text-slate-400 flex justify-between border-t border-slate-800 pt-2">
+          <span>Visualization</span>
+          <span>Slide 9 of 15</span>
+        </div>
+      </div>
+
+      <!-- ==========================================
+           SLIDE 10: Layouts & Containers
+      =========================================== -->
+      <div class="slide bg-content-navy flex-col justify-between p-8 sm:p-12 text-white">
+        <div>
+          <h2 class="text-2xl sm:text-3xl font-bold text-white">Layouts & Section Formatting</h2>
+          <hr class="red-title-rule" />
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <p class="text-xs text-slate-300 mb-2 font-semibold">Sidebars, Columns & Tabs Code:</p>
+              <pre class="bg-slate-950 p-4 rounded-lg border border-slate-800 text-xs leading-relaxed overflow-x-auto"><code># Sidebar controls
+st.sidebar.title("Navigation")
+option = st.sidebar.selectbox("Page", ["Home", "Data"])
+
+# Multi-column layout
+col1, col2 = st.columns(2)
+with col1:
+    st.write("Column 1 Content")
+with col2:
+    st.write("Column 2 Content")
+
+# Tabbed containers
+tab1, tab2 = st.tabs(["Metrics", "Logs"])
+with tab1:
+    st.write("Tab 1 View")</code></pre>
+            </div>
+
+            <!-- Visual Wireframe Mockup -->
+            <div class="bg-slate-900 border border-slate-700 p-3 rounded-lg flex space-x-2 text-xs">
+              <!-- Sidebar wireframe -->
+              <div class="w-1/3 bg-slate-800 border border-slate-700 rounded p-2 flex flex-col justify-between">
+                <div>
+                  <span class="font-bold text-[10px] text-red-400 block mb-1">st.sidebar</span>
+                  <div class="bg-slate-700 h-2 rounded mb-1 w-3/4"></div>
+                  <div class="bg-slate-700 h-4 rounded w-full border border-slate-600 mb-2"></div>
+                </div>
+                <span class="text-[9px] text-slate-400">Fixed Control Panel</span>
+              </div>
+
+              <!-- Main Content Wireframe -->
+              <div class="w-2/3 space-y-2">
+                <!-- Columns -->
+                <div class="text-[10px] text-slate-400 font-semibold">st.columns([1, 1])</div>
+                <div class="grid grid-cols-2 gap-2">
+                  <div class="bg-slate-800 border border-slate-700 p-2 rounded text-center text-[10px]">col1</div>
+                  <div class="bg-slate-800 border border-slate-700 p-2 rounded text-center text-[10px]">col2</div>
+                </div>
+
+                <!-- Tabs -->
+                <div class="text-[10px] text-slate-400 font-semibold pt-1">st.tabs(["Metrics", "Logs"])</div>
+                <div class="bg-slate-800 border border-slate-700 p-2 rounded">
+                  <div class="flex space-x-2 border-b border-slate-700 pb-1 mb-1 text-[9px]">
+                    <span class="text-red-400 font-bold border-b border-red-500">Metrics</span>
+                    <span class="text-slate-500">Logs</span>
+                  </div>
+                  <div class="text-[9px] text-slate-300">Tab container body area</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-xs text-slate-400 flex justify-between border-t border-slate-800 pt-2">
+          <span>Layout Architecture</span>
+          <span>Slide 10 of 15</span>
+        </div>
+      </div>
+
+      <!-- ==========================================
+           SLIDE 11: Quote / Mindset Slide
+      =========================================== -->
+      <div class="slide bg-content-navy flex-col justify-center items-center p-8 sm:p-12 text-center text-white">
+        <div class="max-w-3xl my-auto space-y-6">
+          <svg class="w-12 h-12 text-red-600 mx-auto opacity-80" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/>
+          </svg>
+
+          <blockquote class="text-xl sm:text-3xl font-light italic leading-relaxed text-slate-100">
+            "Streamlit turns data scripts into shareable web apps in minutes — no front-end experience or web framework boilerplate required."
+          </blockquote>
+
+          <hr class="red-title-rule max-w-xs mx-auto" />
+
+          <p class="text-sm font-semibold text-red-400 uppercase tracking-widest">
+            The Core Streamlit Philosophy
+          </p>
+        </div>
+      </div>
+
+      <!-- ==========================================
+           SLIDE 12: Section Divider / Advanced Features
+      =========================================== -->
+      <div class="slide bg-content-navy flex-col justify-between p-8 sm:p-12 text-white">
+        <div>
+          <h2 class="text-2xl sm:text-3xl font-bold text-white">Session State & Caching</h2>
+          <hr class="red-title-rule" />
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Session State Box -->
+            <div class="bg-slate-800/80 p-4 rounded-lg border border-slate-700">
+              <span class="text-xs font-mono text-red-400 font-bold block mb-1">STATE PERSISTENCE</span>
+              <h3 class="font-bold text-base text-slate-100 mb-2">`st.session_state`</h3>
+              <p class="text-xs text-slate-300 mb-3">
+                Persists variables across script re-runs during a active browser session.
+              </p>
+              <pre class="bg-slate-950 p-3 rounded text-xs"><code>if "counter" not in st.session_state:
+    st.session_state.counter = 0
+
+if st.button("Increment"):
+    st.session_state.counter += 1
+
+st.write("Count:", st.session_state.counter)</code></pre>
+            </div>
+
+            <!-- Caching Box -->
+            <div class="bg-slate-800/80 p-4 rounded-lg border border-slate-700">
+              <span class="text-xs font-mono text-yellow-400 font-bold block mb-1">PERFORMANCE OPTIMIZATION</span>
+              <h3 class="font-bold text-base text-slate-100 mb-2">`@st.cache_data`</h3>
+              <p class="text-xs text-slate-300 mb-3">
+                Caches expensive database queries or ML model computations to avoid execution on every re-run.
+              </p>
+              <pre class="bg-slate-950 p-3 rounded text-xs"><code>@st.cache_data
+def fetch_heavy_dataset(query_id):
+    # Runs ONLY when query_id changes
+    df = pd.read_sql(...)
+    return df
+
+data = fetch_heavy_dataset(101)</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-xs text-slate-400 flex justify-between border-t border-slate-800 pt-2">
+          <span>Advanced State & Performance</span>
+          <span>Slide 12 of 15</span>
+        </div>
+      </div>
+
+      <!-- ==========================================
+           SLIDE 13: Complete App Walkthrough
+      =========================================== -->
+      <div class="slide bg-content-navy flex-col justify-between p-8 sm:p-12 text-white">
+        <div>
+          <h2 class="text-2xl sm:text-3xl font-bold text-white">Complete App Structure</h2>
+          <hr class="red-title-rule" />
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Full Python Script -->
+            <div>
+              <p class="text-xs text-slate-300 mb-1 font-semibold">Full Application Source Code:</p>
+              <pre class="bg-slate-950 p-3 rounded-lg border border-slate-800 text-[11px] leading-relaxed overflow-x-auto h-56"><code>import streamlit as st
+import pandas as pd
+
+st.set_page_config(page_title="Data Portal", layout="wide")
+
+st.sidebar.title("Filters")
+sample_size = st.sidebar.slider("Samples", 10, 100, 50)
+
+st.title("Interactive Data Dashboard")
+st.write(f"Displaying top {sample_size} records.")
+
+data = pd.DataFrame({"ID": range(sample_size), "Score": [x*1.5 for x in range(sample_size)]})
+
+col1, col2 = st.columns(2)
+with col1:
+    st.subheader("Data Summary")
+    st.dataframe(data)
+with col2:
+    st.subheader("Distribution Chart")
+    st.line_chart(data["Score"])</code></pre>
+            </div>
+
+            <!-- End-to-End Application UI Preview -->
+            <div>
+              <p class="text-xs text-slate-300 mb-1 font-semibold">Live Rendered Streamlit Dashboard:</p>
+              <div class="bg-slate-900 border border-slate-700 p-3 rounded-lg text-xs space-y-2 h-56 flex flex-col justify-between">
+                <div>
+                  <div class="border-b border-slate-800 pb-1 mb-2 flex justify-between items-center">
+                    <span class="font-bold text-white text-sm">Interactive Data Dashboard</span>
+                    <span class="text-[9px] bg-red-900/60 text-red-300 px-2 py-0.5 rounded border border-red-700">Running</span>
+                  </div>
+                  <p class="text-slate-400 text-[11px]">Displaying top 50 records.</p>
+                  
+                  <div class="grid grid-cols-2 gap-2 mt-2">
+                    <div class="bg-slate-800 p-2 rounded border border-slate-700">
+                      <span class="text-[10px] font-bold text-slate-300 block mb-1">Data Summary</span>
+                      <div class="text-[9px] font-mono text-yellow-300">ID: 0..49 | Score: 0.0..73.5</div>
+                    </div>
+                    <div class="bg-slate-800 p-2 rounded border border-slate-700">
+                      <span class="text-[10px] font-bold text-slate-300 block mb-1">Distribution Chart</span>
+                      <div class="h-10 bg-slate-900 rounded border border-slate-700 flex items-end px-1 space-x-1">
+                        <div class="w-1/4 h-2 bg-red-500 rounded-t"></div>
+                        <div class="w-1/4 h-4 bg-red-500 rounded-t"></div>
+                        <div class="w-1/4 h-6 bg-red-500 rounded-t"></div>
+                        <div class="w-1/4 h-8 bg-red-500 rounded-t"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="text-[10px] text-slate-500 border-t border-slate-800 pt-1 flex justify-between">
+                  <span>Press 'R' to force reload script</span>
+                  <span>Port: 8501</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-xs text-slate-400 flex justify-between border-t border-slate-800 pt-2">
+          <span>App Architecture</span>
+          <span>Slide 13 of 15</span>
+        </div>
+      </div>
+
+      <!-- ==========================================
+           SLIDE 14: Best Practices & Common Pitfalls
+      =========================================== -->
+      <div class="slide bg-content-navy flex-col justify-between p-8 sm:p-12 text-white">
+        <div>
+          <h2 class="text-2xl sm:text-3xl font-bold text-white">Best Practices & Common Gotchas</h2>
+          <hr class="red-title-rule" />
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+            <!-- Best Practices -->
+            <div class="space-y-3">
+              <h3 class="text-sm font-bold text-green-400 uppercase tracking-wider flex items-center gap-1.5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                Recommended Patterns
+              </h3>
+              
+              <div class="bg-slate-800/80 p-3 rounded border border-slate-700">
+                <h4 class="font-bold text-xs text-white">Use Unique Keys for Dynamic Widgets</h4>
+                <p class="text-[11px] text-slate-300">Always supply `key="unique_identifier"` when instantiating widgets inside loops.</p>
+              </div>
+
+              <div class="bg-slate-800/80 p-3 rounded border border-slate-700">
+                <h4 class="font-bold text-xs text-white">Leverage `@st.cache_data` for Data Reading</h4>
+                <p class="text-[11px] text-slate-300">Wrap SQL connections and file loading in cached functions to prevent re-fetching on every slider move.</p>
+              </div>
+
+              <div class="bg-slate-800/80 p-3 rounded border border-slate-700">
+                <h4 class="font-bold text-xs text-white">Organize Code into Functions</h4>
+                <p class="text-[11px] text-slate-300">Keep `main()` clean and break layout sections into modular helper functions.</p>
+              </div>
+            </div>
+
+            <!-- Common Pitfalls -->
+            <div class="space-y-3">
+              <h3 class="text-sm font-bold text-red-400 uppercase tracking-wider flex items-center gap-1.5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                Common Pitfalls
+              </h3>
+
+              <div class="bg-slate-800/80 p-3 rounded border border-slate-700">
+                <h4 class="font-bold text-xs text-white">Expecting Button State to Persist</h4>
+                <p class="text-[11px] text-slate-300">`st.button` only returns `True` for the single run right after clicking. Store state in `st.session_state` instead.</p>
+              </div>
+
+              <div class="bg-slate-800/80 p-3 rounded border border-slate-700">
+                <h4 class="font-bold text-xs text-white">Heavy Computations Outside Caching</h4>
+                <p class="text-[11px] text-slate-300">Placing raw ML predictions or API calls outside cached blocks will freeze your UI on every interaction.</p>
+              </div>
+
+              <div class="bg-slate-800/80 p-3 rounded border border-slate-700">
+                <h4 class="font-bold text-xs text-white">Duplicate Widget Key Collisions</h4>
+                <p class="text-[11px] text-slate-300">Re-using the exact same label without custom keys triggers a `StreamlitAPIException`.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-xs text-slate-400 flex justify-between border-t border-slate-800 pt-2">
+          <span>Best Practices</span>
+          <span>Slide 14 of 15</span>
+        </div>
+      </div>
+
+      <!-- ==========================================
+           SLIDE 15: Summary & References
+      =========================================== -->
+      <div class="slide bg-content-navy flex-col justify-between p-8 sm:p-12 text-white">
+        <div>
+          <div class="flex justify-between items-center">
+            <h2 class="text-2xl sm:text-3xl font-bold text-white">Summary & Resources</h2>
+            <!-- Logo Fallback -->
+            <img src="OPA_data_factory.png" alt="OPA Data Factory" class="h-8 w-auto" onerror="this.style.display='none'; document.getElementById('logo-fallback-15').classList.remove('hidden');" />
+            <div id="logo-fallback-15" class="hidden text-xs text-slate-400 font-semibold">OPA DATA FACTORY</div>
+          </div>
+          <hr class="red-title-rule" />
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+            <!-- Key Takeaways -->
+            <div class="bg-slate-800/60 p-4 rounded-lg border border-slate-700 space-y-2">
+              <h3 class="font-bold text-sm text-yellow-300 mb-2">Key Takeaways</h3>
+              <ul class="space-y-2 text-xs text-slate-300">
+                <li class="flex items-start gap-2">
+                  <span class="text-red-400 font-bold">✓</span>
+                  <span><strong>Rapid Prototyping:</strong> Convert Python scripts directly into live interactive web applications.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="text-red-400 font-bold">✓</span>
+                  <span><strong>Top-to-Bottom Execution:</strong> Simple reactive execution model for instant responsiveness.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="text-red-400 font-bold">✓</span>
+                  <span><strong>Rich Widget Ecosystem:</strong> Built-in support for dataframes, charts, metrics, sidebars, and tabs.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="text-red-400 font-bold">✓</span>
+                  <span><strong>Session & Caching:</strong> Optimize heavy work with `@st.cache_data` and track state with `st.session_state`.</span>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Documentation & Links -->
+            <div class="bg-slate-800/60 p-4 rounded-lg border border-slate-700 space-y-3">
+              <h3 class="font-bold text-sm text-yellow-300">Official Resources</h3>
+              
+              <div class="space-y-2 text-xs">
+                <a href="https://docs.streamlit.io" target="_blank" class="block bg-slate-900 p-2.5 rounded border border-slate-700 hover:border-red-500 transition text-slate-200">
+                  <span class="text-red-400 font-bold font-mono">docs.streamlit.io</span>
+                  <p class="text-[11px] text-slate-400 mt-0.5">Official Streamlit documentation and cheat sheet reference.</p>
+                </a>
+
+                <a href="https://streamlit.io/gallery" target="_blank" class="block bg-slate-900 p-2.5 rounded border border-slate-700 hover:border-red-500 transition text-slate-200">
+                  <span class="text-red-400 font-bold font-mono">streamlit.io/gallery</span>
+                  <p class="text-[11px] text-slate-400 mt-0.5">Explore community app examples and inspiration.</p>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-slate-900/80 p-3 rounded-lg border border-slate-800 flex justify-between items-center text-xs text-slate-300">
+          <span>Thank you for attending! Questions & Discussion</span>
+          <span class="text-red-400 font-semibold">End of Presentation</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ==========================================
+         NAVIGATION FOOTER CONTROLS
+    =========================================== -->
+    <div class="relative z-30 bg-slate-900/90 backdrop-blur-md border-t border-slate-800 px-4 py-2.5 flex items-center justify-between text-xs text-slate-300 select-none">
+      <!-- Left Controls: Prev / Next -->
+      <div class="flex items-center space-x-2">
+        <button id="btn-prev" onclick="prevSlide()" class="bg-slate-800 hover:bg-red-700 border border-slate-700 hover:border-red-600 text-white px-3 py-1.5 rounded transition flex items-center space-x-1">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+          <span>Prev</span>
+        </button>
+        <button id="btn-next" onclick="nextSlide()" class="bg-slate-800 hover:bg-red-700 border border-slate-700 hover:border-red-600 text-white px-3 py-1.5 rounded transition flex items-center space-x-1">
+          <span>Next</span>
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        </button>
+      </div>
+
+      <!-- Middle Controls: Dropdown & Counter -->
+      <div class="flex items-center space-x-3">
+        <select id="slide-select" onchange="goToSlide(parseInt(this.value))" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200 focus:outline-none focus:border-red-500">
+          <option value="0">1. Title Slide</option>
+          <option value="1">2. Speaker Agenda</option>
+          <option value="2">3. Question #1 (Fixed)</option>
+          <option value="3">4. Architecture & Model</option>
+          <option value="4">5. Text Commands</option>
+          <option value="5">6. Question #2 (Fixed)</option>
+          <option value="6">7. Interactive Widgets</option>
+          <option value="7">8. Data & Metrics</option>
+          <option value="8">9. Charts & Plotting</option>
+          <option value="9">10. Layout Containers</option>
+          <option value="10">11. Philosophy Quote</option>
+          <option value="11">12. State & Caching</option>
+          <option value="12">13. Complete App Example</option>
+          <option value="13">14. Best Practices</option>
+          <option value="14">15. Summary & Resources</option>
+        </select>
+
+        <span id="slide-counter" class="font-mono text-slate-400 text-xs">Slide 1 / 15</span>
+      </div>
+
+      <!-- Right Controls: Keyboard Hint & Fullscreen -->
+      <div class="flex items-center space-x-3">
+        <span class="hidden sm:inline text-[11px] text-slate-500">Use <kbd class="px-1 py-0.5 bg-slate-800 border border-slate-700 rounded text-slate-300">←</kbd> <kbd class="px-1 py-0.5 bg-slate-800 border border-slate-700 rounded text-slate-300">→</kbd> <kbd class="px-1 py-0.5 bg-slate-800 border border-slate-700 rounded text-slate-300">Space</kbd></span>
+        <button onclick="toggleFullscreen()" class="bg-slate-800 hover:bg-slate-700 p-1.5 rounded text-slate-300 border border-slate-700" title="Toggle Fullscreen">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ==========================================
+       INTERACTIVE JAVASCRIPT LOGIC
+  =========================================== -->
+  <script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    const counterEl = document.getElementById('slide-counter');
+    const selectEl = document.getElementById('slide-select');
+
+    // Display specific slide
+    function showSlide(index) {
+      if (index < 0) index = 0;
+      if (index >= totalSlides) index = totalSlides - 1;
+
+      slides.forEach((slide, i) => {
+        if (i === index) {
+          slide.classList.add('active');
+        } else {
+          slide.classList.remove('active');
+        }
+      });
+
+      currentSlide = index;
+      counterEl.textContent = `Slide ${currentSlide + 1} / ${totalSlides}`;
+      selectEl.value = currentSlide;
+
+      // Disable/Enable Buttons
+      document.getElementById('btn-prev').disabled = currentSlide === 0;
+      document.getElementById('btn-next').disabled = currentSlide === totalSlides - 1;
+      document.getElementById('btn-prev').style.opacity = currentSlide === 0 ? '0.5' : '1';
+      document.getElementById('btn-next').style.opacity = currentSlide === totalSlides - 1 ? '0.5' : '1';
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides - 1) {
+        showSlide(currentSlide + 1);
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) {
+        showSlide(currentSlide - 1);
+      }
+    }
+
+    function goToSlide(index) {
+      showSlide(index);
+    }
+
+    // Keyboard controls (Left, Right, Space)
+    document.addEventListener('keydown', (e) => {
+      // Avoid triggering when focused inside inputs
+      if (['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
+        return;
+      }
+
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        e.preventDefault();
+        nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault();
+        prevSlide();
+      }
+    });
+
+    // Simulated widget feedback generator for Slide 7
+    function updateSimulatedOutput() {
+      const name = document.getElementById('demo-name').value || 'User';
+      const age = document.getElementById('demo-age').value;
+      const role = document.getElementById('demo-role').value;
+      const agree = document.getElementById('demo-[#agree]').checked;
+
+      document.getElementById('demo-age-val').textContent = age;
+
+      const resultBox = document.getElementById('simulated-result');
+      if (agree) {
+        resultBox.textContent = `Hello ${name}, Age ${age} (${role})`;
+        resultBox.className = "bg-slate-950 p-2.5 rounded border border-slate-800 font-mono text-yellow-300 text-[11px]";
+      } else {
+        resultBox.textContent = "Please check 'I agree to terms' to submit.";
+        resultBox.className = "bg-slate-950 p-2.5 rounded border border-red-900/60 font-mono text-red-400 text-[11px]";
+      }
+    }
+
+    // Fullscreen Toggle Helper
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => {
+          console.log(`Fullscreen request failed: ${err.message}`);
+        });
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+    }
+
+    // Initialize slide deck on page load
+    window.onload = function() {
+      showSlide(0);
+    };
+  </script>
+</body>
+</html>

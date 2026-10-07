@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lecture 5: PySpark ALS & Neo4j - Interactive Study Guide</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#16a34a',
+                            600: '#15803d',
+                            700: '#15803d',
+                            900: '#14532d',
+                        },
+                        spark: {
+                            500: '#e15700',
+                            600: '#c2410c',
+                        },
+                        neo: {
+                            500: '#008cc1',
+                            600: '#0284c7',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+  <!-- MathJax Configuration -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        processEscapes: true
+      },
+      options: {
+        ignoreHtmlClass: 'tex2jax_ignore',
+        processHtmlClass: 'tex2jax_process'
+      }
+    };
+  </script>
+  <!-- MathJax Library -->
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- MathJax for rendering formulas -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        .transform-style-3d {
+            transform-style: preserve-3d;
+        }
+        .backface-hidden {
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .dark ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-full flex flex-col font-sans transition-colors duration-200">
+
+    <!-- Header & Navigation -->
+    <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col md:flex-row items-center justify-between gap-4">
+            <!-- Title & Institution Info -->
+            <div class="flex items-center space-x-3">
+                <div class="p-2.5 bg-gradient-to-br from-amber-500 to-emerald-600 text-white rounded-xl shadow-md">
+                    <i class="fa-solid fa-server text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+                        Recommender Systems
+                        <span class="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300">Lecture 5</span>
+                    </h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">
+                        AUEB AI Data Factory • Dr. Dimitrios Panagopoulos • <a href="https://dpanagopoulos.com/" target="_blank" class="text-emerald-600 dark:text-emerald-400 hover:underline">dpanagopoulos.com</a>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Progress Dashboard Bar -->
+            <div class="flex items-center gap-6 w-full md:w-auto justify-between md:justify-end">
+                <div class="flex items-center gap-4 text-xs">
+                    <!-- Flashcard Progress -->
+                    <div class="flex flex-col">
+                        <span class="text-slate-500 dark:text-slate-400 font-medium">Flashcards Mastered</span>
+                        <div class="flex items-center gap-2">
+                            <div class="w-24 bg-slate-200 dark:bg-slate-700 rounded-full h-2 overflow-hidden">
+                                <div id="flashcard-progress-bar" class="bg-emerald-500 h-full transition-all duration-300" style="width: 0%"></div>
+                            </div>
+                            <span id="flashcard-progress-text" class="font-bold text-slate-700 dark:text-slate-200">0/10</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Quiz Progress -->
+                    <div class="flex flex-col">
+                        <span class="text-slate-500 dark:text-slate-400 font-medium">Quiz Score</span>
+                        <div class="flex items-center gap-2">
+                            <span id="quiz-score-badge" class="font-bold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
+                                Unattempted
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dark Mode Toggle -->
+                <button id="theme-toggle" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors" title="Toggle Theme">
+                    <i id="theme-toggle-icon" class="fa-solid fa-moon"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-slate-100 dark:border-slate-700/50">
+            <nav class="flex space-x-8 overflow-x-auto py-2 text-sm font-medium">
+                <button onclick="switchTab('lecture-summary')" id="tab-lecture-summary" class="tab-btn px-3 py-2 rounded-md text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-900/30 whitespace-nowrap flex items-center gap-2">
+                    <i class="fa-solid fa-book-open"></i> Key Concepts & Notes
+                </button>
+                <button onclick="switchTab('flashcards')" id="tab-flashcards" class="tab-btn px-3 py-2 rounded-md text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white whitespace-nowrap flex items-center gap-2">
+                    <i class="fa-solid fa-clone"></i> Flashcard Deck
+                </button>
+                <button onclick="switchTab('quiz')" id="tab-quiz" class="tab-btn px-3 py-2 rounded-md text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white whitespace-nowrap flex items-center gap-2">
+                    <i class="fa-solid fa-circle-question"></i> Knowledge Quiz
+                </button>
+                <button onclick="switchTab('lab')" id="tab-lab" class="tab-btn px-3 py-2 rounded-md text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white whitespace-nowrap flex items-center gap-2">
+                    <i class="fa-solid fa-microchip"></i> PySpark ALS & Neo4j Interactive Lab
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- TAB 1: LECTURE SUMMARY & KEY CONCEPTS -->
+        <section id="content-lecture-summary" class="tab-content space-y-6">
+            <!-- Hero Banner -->
+            <div class="bg-gradient-to-r from-slate-900 via-emerald-900 to-slate-900 text-white rounded-2xl p-6 md:p-8 shadow-xl border border-emerald-500/20">
+                <div class="max-w-3xl">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                            Apache PySpark
+                        </span>
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                            Neo4j Graph DB
+                        </span>
+                    </div>
+                    <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight mb-2">
+                        Lecture 5: Scalable Recommenders with PySpark ALS & Neo4j
+                    </h2>
+                    <p class="text-slate-300 text-sm md:text-base leading-relaxed">
+                        Comprehensive summary of large-scale distributed collaborative filtering using PySpark's Alternating Least Squares (ALS) matrix completion and graph-based recommendation using Neo4j and Cypher.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Key Modules Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                <!-- Card 1: Apache Spark Overview -->
+                <div class="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/50 text-orange-600 dark:text-orange-400 flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-bolt text-lg"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">1. Apache PySpark Distributed Engine</h3>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
+                        Unified open-source analytics engine developed at UC Berkeley AMPLab for large-scale cluster data processing with implicit data parallelism and fault tolerance.
+                    </p>
+                    <div class="bg-slate-50 dark:bg-slate-900/60 p-3 rounded-lg border border-slate-100 dark:border-slate-700/50 text-xs text-slate-600 dark:text-slate-400">
+                        <span><strong>Why for Recommenders?</strong> Scales matrix calculations across thousands of worker nodes when user-item matrices exceed single-node RAM.</span>
+                    </div>
+                </div>
+
+                <!-- Card 2: Matrix Completion via ALS -->
+                <div class="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-square-root-variable text-lg"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">2. Alternating Least Squares (ALS)</h3>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-3">
+                        Decomposes large rating matrix $R \approx U \cdot V^T$ into user factors $U \in \mathbb{R}^{m \times k}$ and item factors $V \in \mathbb{R}^{n \times k}$.
+                    </p>
+                    <div class="p-2 bg-slate-50 dark:bg-slate-900/60 rounded-lg text-center text-xs font-mono text-slate-800 dark:text-slate-200 overflow-x-auto mb-2">
+                        $$\min_{U,V} \sum_{(u,i) \in R} (r_{ui} - \mathbf{u}_u^T \mathbf{v}_i)^2 + \lambda (\|\mathbf{u}_u\|^2 + \|\mathbf{v}_i\|^2)$$
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">
+                        <strong>Alternating optimization:</strong> Fix $V$ and solve convex quadratic form for $U$; then fix $U$ and solve for $V$.
+                    </p>
+                </div>
+
+                <!-- Card 3: PySpark MLlib ALS Implementation -->
+                <div class="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400 flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-sliders text-lg"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">3. PySpark ALS Parameters</h3>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-3">
+                        Key API configurations in <code class="text-purple-600 dark:text-purple-400 font-mono text-xs">pyspark.ml.recommendation.ALS</code>:
+                    </p>
+                    <ul class="text-xs space-y-1.5 text-slate-600 dark:text-slate-400">
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-check text-emerald-500 mt-0.5"></i>
+                            <span><strong class="text-slate-800 dark:text-slate-200">rank:</strong> Number of latent factor dimensions $k$ (e.g., 10–50).</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-check text-emerald-500 mt-0.5"></i>
+                            <span><strong class="text-slate-800 dark:text-slate-200">regParam ($\lambda$):</strong> Regularization factor to prevent overfitting.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-check text-emerald-500 mt-0.5"></i>
+                            <span><strong class="text-slate-800 dark:text-slate-200">coldStartStrategy:</strong> Set to <code class="text-rose-500">"drop"</code> to avoid NaN predictions on unknown test items.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Card 4: Neo4j & Graph Data Modeling -->
+                <div class="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="w-10 h-10 rounded-lg bg-cyan-100 dark:bg-cyan-900/50 text-cyan-600 dark:text-cyan-400 flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-diagram-project text-lg"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">4. Neo4j Property Graph Model</h3>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-3">
+                        Represents items and users as graph nodes connected by directional, property-rich relationships.
+                    </p>
+                    <div class="p-3 bg-slate-50 dark:bg-slate-900/60 rounded-lg text-xs space-y-1 font-mono text-slate-700 dark:text-slate-300 border border-slate-100 dark:border-slate-700/50">
+                        <div><span class="text-cyan-500">(u:User)</span>-<span class="text-amber-500">[r:RATED {Rating: 5}]</span>-&gt;<span class="text-emerald-500">(m:Movie)</span></div>
+                        <div class="text-[11px] text-slate-400 mt-1">User attributes: Gender, Age, Occupation | Movie attributes: Title, Genres</div>
+                    </div>
+                </div>
+
+                <!-- Card 5: GraphDataScience Python Client -->
+                <div class="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-plug text-lg"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">5. Neo4j & Python GraphDataScience</h3>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-3">
+                        Connects Python to Neo4j database using Bolt protocol (<code class="text-blue-600 dark:text-blue-400 font-mono text-xs">bolt://localhost:7687</code>).
+                    </p>
+                    <ul class="text-xs space-y-2 text-slate-600 dark:text-slate-400">
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-check text-emerald-500 mt-0.5"></i>
+                            <span>Node constraints: <code class="text-xs bg-slate-100 dark:bg-slate-700 px-1 py-0.5 rounded">CREATE CONSTRAINT ... REQUIRE (n.id) IS NODE KEY</code></span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-check text-emerald-500 mt-0.5"></i>
+                            <span>Batch processing using <code class="text-xs bg-slate-100 dark:bg-slate-700 px-1 py-0.5 rounded">UNWIND $data AS row MERGE ...</code></span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Card 6: Cypher Graph Recommendations -->
+                <div class="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="w-10 h-10 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-route text-lg"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">6. Cypher Path Traversal</h3>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-3">
+                        Finds similar movies by counting graph paths through common satisfied users:
+                    </p>
+                    <div class="bg-slate-900 text-emerald-400 p-2.5 rounded-lg text-[11px] font-mono overflow-x-auto">
+                        MATCH (m1:Movie)-[r1]-(u:User)-[r2]-(m2:Movie)<br>
+                        WHERE m1.Title CONTAINS 'Toy Story'<br>
+                        &nbsp;&nbsp;AND r1.Rating=5 AND r2.Rating=5<br>
+                        RETURN m2.Title, count(DISTINCT u) AS common_users<br>
+                        ORDER BY common_users DESC
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- TAB 2: FLASHCARD DECK -->
+        <section id="content-flashcards" class="tab-content hidden space-y-6">
+            <!-- Deck Filter & Controls -->
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                <div class="flex items-center gap-2 overflow-x-auto w-full sm:w-auto pb-2 sm:pb-0">
+                    <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider mr-2">Category:</span>
+                    <button onclick="filterFlashcards('all')" class="fc-filter-btn active text-xs px-3 py-1.5 rounded-full bg-emerald-600 text-white font-medium">All (10)</button>
+                    <button onclick="filterFlashcards('pyspark')" class="fc-filter-btn text-xs px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 font-medium">PySpark & ALS</button>
+                    <button onclick="filterFlashcards('neo4j')" class="fc-filter-btn text-xs px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 font-medium">Neo4j & Cypher</button>
+                    <button onclick="filterFlashcards('dataset')" class="fc-filter-btn text-xs px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 font-medium">Dataset & Modeling</button>
+                </div>
+                
+                <div class="flex items-center gap-2">
+                    <button onclick="shuffleFlashcards()" class="text-xs px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-1.5 transition-colors">
+                        <i class="fa-solid fa-shuffle"></i> Shuffle Deck
+                    </button>
+                </div>
+            </div>
+
+            <!-- Flashcard Display Area -->
+            <div class="max-w-xl mx-auto">
+                <div class="perspective-1000 h-80 w-full cursor-pointer group" onclick="flipCurrentCard()">
+                    <div id="flashcard-element" class="transform-style-3d transition-transform duration-500 relative w-full h-full rounded-2xl bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 shadow-xl p-8 flex flex-col justify-between">
+                        
+                        <!-- Front Face -->
+                        <div class="backface-hidden absolute inset-0 p-8 flex flex-col justify-between rounded-2xl bg-white dark:bg-slate-800">
+                            <div class="flex items-center justify-between">
+                                <span id="card-tag" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300">
+                                    Topic
+                                </span>
+                                <span class="text-xs text-slate-400 flex items-center gap-1">
+                                    <i class="fa-solid fa-rotate"></i> Click or press Space to flip
+                                </span>
+                            </div>
+                            <div class="my-auto text-center">
+                                <h3 id="card-question" class="text-xl font-bold text-slate-800 dark:text-white leading-snug">
+                                    Question Text
+                                </h3>
+                            </div>
+                            <div class="text-center text-xs text-slate-400">
+                                Card <span id="card-counter">1 / 10</span>
+                            </div>
+                        </div>
+
+                        <!-- Back Face -->
+                        <div class="backface-hidden rotate-y-180 absolute inset-0 p-8 flex flex-col justify-between rounded-2xl bg-slate-900 text-white border-2 border-emerald-500">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                                    Answer & Explanation
+                                </span>
+                                <span class="text-xs text-slate-400 flex items-center gap-1">
+                                    <i class="fa-solid fa-rotate"></i> Flip back
+                                </span>
+                            </div>
+                            <div class="my-auto text-left space-y-2 overflow-y-auto max-h-48 pr-2">
+                                <p id="card-answer" class="text-sm text-slate-200 leading-relaxed">
+                                    Answer Text
+                                </p>
+                            </div>
+                            <div id="card-source" class="text-xs text-emerald-300 italic border-t border-slate-800 pt-2">
+                                Slide Ref
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Flashcard Navigation & Controls -->
+                <div class="mt-6 flex flex-col items-center gap-4">
+                    <div class="flex items-center gap-4">
+                        <button onclick="prevCard()" class="p-3 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 shadow-sm text-slate-700 dark:text-slate-200">
+                            <i class="fa-solid fa-arrow-left"></i>
+                        </button>
+                        
+                        <div class="flex gap-2">
+                            <button onclick="markCardMastery(false)" class="px-4 py-2 rounded-lg bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300 hover:bg-rose-200 font-medium text-xs flex items-center gap-1.5">
+                                <i class="fa-solid fa-xmark"></i> Needs Practice
+                            </button>
+                            <button onclick="markCardMastery(true)" class="px-4 py-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-200 font-medium text-xs flex items-center gap-1.5">
+                                <i class="fa-solid fa-check"></i> Mastered
+                            </button>
+                        </div>
+
+                        <button onclick="nextCard()" class="p-3 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 shadow-sm text-slate-700 dark:text-slate-200">
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+
+                    <p class="text-xs text-slate-400">Keyboard shortcuts: <kbd class="px-1.5 py-0.5 bg-slate-200 dark:bg-slate-700 rounded text-slate-700 dark:text-slate-300">Left/Right</kbd> to navigate, <kbd class="px-1.5 py-0.5 bg-slate-200 dark:bg-slate-700 rounded text-slate-700 dark:text-slate-300">Space</kbd> to flip.</p>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- TAB 3: QUIZ MODULE -->
+        <section id="content-quiz" class="tab-content hidden space-y-6">
+            <div class="max-w-3xl mx-auto bg-white dark:bg-slate-800 rounded-2xl p-6 md:p-8 border border-slate-200 dark:border-slate-700 shadow-sm">
+                
+                <!-- Quiz Header -->
+                <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-4 mb-6">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900 dark:text-white">Lecture 5 Mastery Quiz</h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Test your understanding of PySpark ALS optimization, matrix factorization, Neo4j schema design, and Cypher graph queries.</p>
+                    </div>
+                    <div id="quiz-timer" class="text-xs font-mono font-bold bg-slate-100 dark:bg-slate-700 px-3 py-1.5 rounded-lg text-slate-700 dark:text-slate-300">
+                        Question <span id="quiz-current-num">1</span> of <span id="quiz-total-num">5</span>
+                    </div>
+                </div>
+
+                <!-- Quiz Form Container -->
+                <div id="quiz-container" class="space-y-6">
+                    <div id="quiz-question-box" class="text-base font-semibold text-slate-800 dark:text-white">
+                        Question loading...
+                    </div>
+
+                    <div id="quiz-options-box" class="space-y-3">
+                        <!-- Options injected dynamically -->
+                    </div>
+
+                    <div id="quiz-explanation-box" class="hidden p-4 rounded-xl text-sm leading-relaxed border">
+                        <!-- Explanation injected dynamically -->
+                    </div>
+
+                    <div class="flex justify-between items-center pt-4 border-t border-slate-100 dark:border-slate-700">
+                        <button id="quiz-reset-btn" onclick="resetQuiz()" class="text-xs text-slate-500 hover:text-slate-800 dark:hover:text-slate-200">
+                            <i class="fa-solid fa-rotate-right"></i> Restart Quiz
+                        </button>
+                        <button id="quiz-next-btn" onclick="nextQuizQuestion()" class="hidden px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium text-sm transition-colors">
+                            Next Question <i class="fa-solid fa-arrow-right ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Quiz Results Summary View -->
+                <div id="quiz-results-box" class="hidden text-center py-8 space-y-6">
+                    <div class="w-20 h-20 rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 mx-auto flex items-center justify-center text-3xl">
+                        <i class="fa-solid fa-award"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold text-slate-900 dark:text-white">Quiz Completed!</h3>
+                        <p class="text-slate-600 dark:text-slate-300 mt-1">
+                            Your Final Score: <span id="quiz-final-score" class="font-extrabold text-emerald-600 dark:text-emerald-400">0/5</span>
+                        </p>
+                        <p id="quiz-badge-text" class="text-xs font-semibold uppercase tracking-wider text-slate-500 mt-2"></p>
+                    </div>
+
+                    <div class="p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl max-w-md mx-auto text-xs text-slate-600 dark:text-slate-300 space-y-1 text-left">
+                        <strong class="block text-slate-800 dark:text-slate-100 mb-1">Key Takeaway:</strong>
+                        <p id="quiz-summary-feedback"></p>
+                    </div>
+
+                    <button onclick="resetQuiz()" class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-sm rounded-xl transition-colors">
+                        Retake Quiz
+                    </button>
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- TAB 4: PYSPARK ALS & NEO4J LAB -->
+        <section id="content-lab" class="tab-content hidden space-y-6">
+            
+            <!-- LAB TOOL 1: ALS Matrix Factorization Calculator -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-6">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-700 pb-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                            <i class="fa-solid fa-calculator text-amber-500"></i> Tool 1: Interactive ALS Factorization & Rating Prediction
+                        </h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">
+                            Simulate how ALS estimates rating $\hat{r}_{ui} = \mathbf{u}_u^T \mathbf{v}_i$ for latent dimension $k=3$ and computes regularized loss.
+                        </p>
+                    </div>
+                    <span class="px-3 py-1 bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 font-mono text-xs rounded-full font-semibold">
+                        $\hat{r}_{ui} = \mathbf{u}_u \cdot \mathbf{v}_i$
+                    </span>
+                </div>
+
+                <!-- Sliders for User Latent Factors -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- User Vector u_u -->
+                    <div class="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl space-y-3 border border-slate-200 dark:border-slate-700">
+                        <div class="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-300">
+                            <span>User Latent Vector $\mathbf{u}_u$ ($k=3$)</span>
+                            <span class="font-mono text-amber-600 dark:text-amber-400" id="u-vector-display">[1.2, 0.8, -0.5]</span>
+                        </div>
+                        
+                        <div>
+                            <label class="text-[11px] text-slate-500 flex justify-between">Factor 1 (Genre Affinity: Action/SciFi): <span id="u1-val">1.2</span></label>
+                            <input type="range" min="-2.0" max="2.0" step="0.1" value="1.2" id="u1-slider" class="w-full accent-amber-500" oninput="updateAlsCalculation()">
+                        </div>
+                        <div>
+                            <label class="text-[11px] text-slate-500 flex justify-between">Factor 2 (Genre Affinity: Drama/Romance): <span id="u2-val">0.8</span></label>
+                            <input type="range" min="-2.0" max="2.0" step="0.1" value="0.8" id="u2-slider" class="w-full accent-amber-500" oninput="updateAlsCalculation()">
+                        </div>
+                        <div>
+                            <label class="text-[11px] text-slate-500 flex justify-between">Factor 3 (Pacing / Niche Style): <span id="u3-val">-0.5</span></label>
+                            <input type="range" min="-2.0" max="2.0" step="0.1" value="-0.5" id="u3-slider" class="w-full accent-amber-500" oninput="updateAlsCalculation()">
+                        </div>
+                    </div>
+
+                    <!-- Item Vector v_i -->
+                    <div class="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl space-y-3 border border-slate-200 dark:border-slate-700">
+                        <div class="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-300">
+                            <span>Movie Latent Vector $\mathbf{v}_i$ ($k=3$)</span>
+                            <span class="font-mono text-emerald-600 dark:text-emerald-400" id="v-vector-display">[1.5, -0.2, 0.9]</span>
+                        </div>
+                        
+                        <div>
+                            <label class="text-[11px] text-slate-500 flex justify-between">Factor 1 (Movie Action Level): <span id="v1-val">1.5</span></label>
+                            <input type="range" min="-2.0" max="2.0" step="0.1" value="1.5" id="v1-slider" class="w-full accent-emerald-500" oninput="updateAlsCalculation()">
+                        </div>
+                        <div>
+                            <label class="text-[11px] text-slate-500 flex justify-between">Factor 2 (Movie Drama Level): <span id="v2-val">-0.2</span></label>
+                            <input type="range" min="-2.0" max="2.0" step="0.1" value="-0.2" id="v2-slider" class="w-full accent-emerald-500" oninput="updateAlsCalculation()">
+                        </div>
+                        <div>
+                            <label class="text-[11px] text-slate-500 flex justify-between">Factor 3 (Movie Stylistic Pacing): <span id="v3-val">0.9</span></label>
+                            <input type="range" min="-2.0" max="2.0" step="0.1" value="0.9" id="v3-slider" class="w-full accent-emerald-500" oninput="updateAlsCalculation()">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Parameters & Live Results -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="p-4 bg-slate-900 text-white rounded-xl space-y-1">
+                        <span class="text-xs text-slate-400">Actual True Rating $r_{ui}$</span>
+                        <div class="flex items-center gap-2">
+                            <input type="number" id="true-rating-input" value="4.5" min="1.0" max="5.0" step="0.5" class="w-20 px-2 py-1 bg-slate-800 text-amber-400 font-bold font-mono rounded text-sm border border-slate-700" oninput="updateAlsCalculation()">
+                            <span class="text-xs text-slate-400">stars</span>
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-slate-900 text-white rounded-xl space-y-1">
+                        <span class="text-xs text-slate-400">Predicted Rating $\hat{r}_{ui} = \mathbf{u}_u^T \mathbf{v}_i$</span>
+                        <div id="predicted-rating-res" class="text-2xl font-bold font-mono text-emerald-400">
+                            2.09
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-slate-900 text-white rounded-xl space-y-1">
+                        <span class="text-xs text-slate-400">Squared Error $(r_{ui} - \hat{r}_{ui})^2$</span>
+                        <div id="squared-error-res" class="text-2xl font-bold font-mono text-cyan-400">
+                            5.81
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LAB TOOL 2: Neo4j Cypher Recommendation Tester -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-6">
+                <div class="border-b border-slate-200 dark:border-slate-700 pb-4">
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        <i class="fa-solid fa-diagram-project text-cyan-500"></i> Tool 2: Cypher Graph Query & Co-Rating Recommendation Tester
+                    </h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">
+                        Test graph traversal recommendations on MovieLens data by finding movies co-rated highly by overlapping users.
+                    </p>
+                </div>
+
+                <!-- Query Parameters Form -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Seed Movie Title</label>
+                        <select id="cypher-seed-movie" class="w-full p-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200" onchange="runCypherSimulation()">
+                            <option value="Toy Story (1995)">Toy Story (1995)</option>
+                            <option value="Star Wars: Episode IV - A New Hope (1977)">Star Wars: Episode IV (1977)</option>
+                            <option value="Jurassic Park (1993)">Jurassic Park (1993)</option>
+                            <option value="Matrix, The (1999)">Matrix, The (1999)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Min User Rating Threshold</label>
+                        <select id="cypher-rating-thresh" class="w-full p-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200" onchange="runCypherSimulation()">
+                            <option value="5">Rating = 5 Stars Only</option>
+                            <option value="4">Rating >= 4 Stars</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Filter User Demographics</label>
+                        <select id="cypher-demo-filter" class="w-full p-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200" onchange="runCypherSimulation()">
+                            <option value="ALL">All Users</option>
+                            <option value="M">Male Users Only (u.Gender = 'M')</option>
+                            <option value="F">Female Users Only (u.Gender = 'F')</option>
+                            <option value="YOUNG">Younger Users (u.Age < 25)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Generated Cypher Query Code Block -->
+                <div class="space-y-1">
+                    <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Generated Cypher Query String:</label>
+                    <div class="bg-slate-900 text-slate-100 p-4 rounded-xl font-mono text-xs overflow-x-auto border border-slate-800">
+                        <pre id="cypher-code-preview" class="text-cyan-300">
+MATCH (m1:Movie)-[r1:RATED]->(u:User)-[r2:RATED]->(m2:Movie)
+WHERE m1.Title CONTAINS 'Toy Story (1995)'
+  AND m2.Title <> 'Toy Story (1995)'
+  AND r1.Rating = 5 AND r2.Rating = 5
+RETURN m2.Title, m2.Genres, count(DISTINCT u) AS common_users
+ORDER BY common_users DESC
+LIMIT 5
+                        </pre>
+                    </div>
+                </div>
+
+                <!-- Simulated Graph Query Results -->
+                <div class="space-y-2">
+                    <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Query Output Results (Simulated Graph Data):</label>
+                    <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700">
+                        <table class="w-full text-left text-xs border-collapse">
+                            <thead class="bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold">
+                                <tr>
+                                    <th class="p-2.5">#</th>
+                                    <th class="p-2.5">Recommended Movie Title (m2.Title)</th>
+                                    <th class="p-2.5">Genres (m2.Genres)</th>
+                                    <th class="p-2.5 text-right">Connecting Common Users</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cypher-results-tbody" class="divide-y divide-slate-200 dark:divide-slate-700 text-slate-800 dark:text-slate-200 font-mono">
+                                <!-- Results injected dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 py-4 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500 dark:text-slate-400">
+            Recommender Systems Lecture 5 Study Guide • PySpark & Neo4j • AI Data Factory (OPA AUEB)
+        </div>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- DATA STRUCTURES ---
+
+        // Flashcards Dataset for Lecture 5
+        const flashcardsData = [
+            {
+                id: 1,
+                tag: "PySpark",
+                category: "pyspark",
+                question: "What is Apache Spark and why is it used for Recommender Systems?",
+                answer: "Apache Spark is an open-source unified analytics engine for large-scale data processing. It provides distributed cluster computing with fault tolerance, making it ideal for matrix operations on datasets with millions of ratings.",
+                source: "Slide 3"
+            },
+            {
+                id: 2,
+                tag: "ALS Factorization",
+                category: "pyspark",
+                question: "What does ALS stand for and what problem does it solve?",
+                answer: "ALS stands for Alternating Least Squares. It performs matrix completion by approximating a sparse rating matrix R as the product of two lower-rank matrices: User factors U and Item factors V (R ≈ U * V^T).",
+                source: "Slide 4"
+            },
+            {
+                id: 3,
+                tag: "ALS Optimization",
+                category: "pyspark",
+                question: "Why is matrix factorization non-convex, and how does ALS handle it?",
+                answer: "Optimizing U and V simultaneously is non-convex. ALS alternatingly holds V constant to solve a linear least squares problem for U, and then holds U constant to solve for V, making each sub-step convex.",
+                source: "Slide 4"
+            },
+            {
+                id: 4,
+                tag: "PySpark MLlib",
+                category: "pyspark",
+                question: "What does the 'coldStartStrategy' parameter do in PySpark ALS?",
+                answer: "Setting coldStartStrategy='drop' instructs PySpark to drop any rows in DataFrame predictions that contain unobserved users or items, preventing evaluation metrics (like RMSE) from returning NaN.",
+                source: "Notebook / MLlib Docs"
+            },
+            {
+                id: 5,
+                tag: "Neo4j Schema",
+                category: "neo4j",
+                question: "What is a Property Graph in Neo4j?",
+                answer: "A database model consisting of Nodes (entities like User or Movie) connected by directed Relationships (like RATED), where both nodes and relationships can hold key-value properties (e.g., Rating, Age).",
+                source: "Slide 5"
+            },
+            {
+                id: 6,
+                tag: "Graph Constraints",
+                category: "neo4j",
+                question: "Why do we execute 'CREATE CONSTRAINT FOR (n:User) REQUIRE (n.id) IS NODE KEY' in Neo4j?",
+                answer: "It ensures uniqueness and speeds up lookup operations by creating an indexed node key on user IDs before merging large batches of rating records.",
+                source: "Notebook cell 6"
+            },
+            {
+                id: 7,
+                tag: "Cypher Query",
+                category: "neo4j",
+                question: "How does Neo4j generate movie recommendations using graph paths?",
+                answer: "By traversing paths of the form (m1:Movie)-[:RATED]-(u:User)-[:RATED]-(m2:Movie) and ranking target movies m2 by the count of distinct overlapping highly-satisfied users.",
+                source: "Notebook cell 9"
+            },
+            {
+                id: 8,
+                tag: "Python Integration",
+                category: "neo4j",
+                question: "What is the Python GraphDataScience (gds) library used for?",
+                answer: "It allows Python programs to connect to Neo4j via the Bolt protocol, run Cypher queries natively, and project graph algorithms directly onto dataframes.",
+                source: "Notebook cell 2"
+            },
+            {
+                id: 9,
+                tag: "MovieLens Dataset",
+                category: "dataset",
+                question: "Which dataset is utilized in the PySpark and Neo4j lecture demonstrations?",
+                answer: "The MovieLens 1M dataset created by GroupLens Research at the University of Minnesota, containing 1,000,209 ratings across 6,040 users and 3,900 movies.",
+                source: "Slide 5"
+            },
+            {
+                id: 10,
+                tag: "Data Batching",
+                category: "dataset",
+                question: "Why was np.array_split used when creating RATED relationships in Neo4j?",
+                answer: "To split 1,000,000 rating rows into smaller chunks (e.g., 200 batches) so Cypher UNWIND transactions do not exceed memory limits on the database server.",
+                source: "Notebook cell 8"
+            }
+        ];
+
+        // Quiz Questions Dataset for Lecture 5
+        const quizData = [
+            {
+                question: "In PySpark MLlib's ALS implementation, what does the 'rank' parameter control?",
+                options: [
+                    "The number of top recommendations returned per user",
+                    "The number of latent factor dimensions k in matrices U and V",
+                    "The penalty factor for L2 regularization",
+                    "The total number of parallel execution executor nodes"
+                ],
+                answerIndex: 1,
+                explanation: "'rank' specifies the number of latent factors (dimensionality k) used to factorize the rating matrix R ≈ U * V^T."
+            },
+            {
+                question: "How does the Alternating Least Squares (ALS) optimization process work?",
+                options: [
+                    "It uses random gradient descent without fixing any variables",
+                    "It holds item factors V fixed to update user factors U, then holds U fixed to update V",
+                    "It computes the exact SVD via singular value decomposition in one single step",
+                    "It continuously recalculates nearest neighbor cosine distances"
+                ],
+                answerIndex: 1,
+                explanation: "ALS alternates between holding V fixed to solve for U and holding U fixed to solve for V, turning a non-convex problem into iterative convex sub-problems."
+            },
+            {
+                question: "Which Cypher clause is used in Neo4j to iterate through batch parameters passed from Python DataFrames?",
+                options: [
+                    "FOREACH LIST",
+                    "UNWIND $data AS row",
+                    "EXPLODE $data",
+                    "SPLIT PARAMETERS"
+                ],
+                answerIndex: 1,
+                explanation: "'UNWIND $data AS row' converts a list of records into individual rows inside Cypher queries for efficient batch merging."
+            },
+            {
+                question: "In a Cypher graph query for recommendation, what does the pattern (m1:Movie)-[r1]-(u:User)-[r2]-(m2:Movie) represent?",
+                options: [
+                    "Users who wrote movie reviews together",
+                    "A 2-hop path linking movie m1 to movie m2 via common user u who rated both",
+                    "Direct links between two movies of similar genres",
+                    "A hierarchical tree structure of directors and actors"
+                ],
+                answerIndex: 1,
+                explanation: "This graph pattern identifies paths where a single user u has rated both seed movie m1 and candidate movie m2."
+            },
+            {
+                question: "Why is setting 'coldStartStrategy=\"drop\"' recommended during PySpark ALS model evaluation?",
+                options: [
+                    "To remove corrupted CSV files from memory",
+                    "To automatically drop users with low overall ratings",
+                    "To prevent evaluation metrics (e.g., RMSE) from evaluating to NaN when unobserved users/items appear in test data",
+                    "To delete zero entries from sparse matrices"
+                ],
+                answerIndex: 2,
+                explanation: "Without dropping unknown entities during test evaluation, PySpark yields NaN for predictions on unobserved items, ruining evaluation metric scoring."
+            }
+        ];
+
+        // --- STATE MANAGEMENT ---
+        let currentDeck = [...flashcardsData];
+        let currentCardIndex = 0;
+        let isCardFlipped = false;
+        let masteredCards = new Set();
+
+        let currentQuizIndex = 0;
+        let quizScore = 0;
+
+        // --- TAB SWITCHING ---
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('text-emerald-700', 'dark:text-emerald-300', 'bg-emerald-50', 'dark:bg-emerald-900/30');
+                el.classList.add('text-slate-600', 'dark:text-slate-400');
+            });
+
+            document.getElementById(`content-${tabId}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`tab-${tabId}`);
+            activeBtn.classList.add('text-emerald-700', 'dark:text-emerald-300', 'bg-emerald-50', 'dark:bg-emerald-900/30');
+            activeBtn.classList.remove('text-slate-600', 'dark:text-slate-400');
+        }
+
+        // --- FLASHCARD LOGIC ---
+        function updateCardDisplay() {
+            if (currentDeck.length === 0) return;
+            const card = currentDeck[currentCardIndex];
+            
+            const cardEl = document.getElementById('flashcard-element');
+            cardEl.classList.remove('rotate-y-180');
+            isCardFlipped = false;
+
+            setTimeout(() => {
+                document.getElementById('card-tag').innerText = card.tag;
+                document.getElementById('card-question').innerText = card.question;
+                document.getElementById('card-answer').innerText = card.answer;
+                document.getElementById('card-source').innerText = `Source: ${card.source}`;
+                document.getElementById('card-counter').innerText = `${currentCardIndex + 1} / ${currentDeck.length}`;
+            }, 150);
+        }
+
+        function flipCurrentCard() {
+            const cardEl = document.getElementById('flashcard-element');
+            isCardFlipped = !isCardFlipped;
+            if (isCardFlipped) {
+                cardEl.classList.add('rotate-y-180');
+            } else {
+                cardEl.classList.remove('rotate-y-180');
+            }
+        }
+
+        function nextCard() {
+            if (currentDeck.length === 0) return;
+            currentCardIndex = (currentCardIndex + 1) % currentDeck.length;
+            updateCardDisplay();
+        }
+
+        function prevCard() {
+            if (currentDeck.length === 0) return;
+            currentCardIndex = (currentCardIndex - 1 + currentDeck.length) % currentDeck.length;
+            updateCardDisplay();
+        }
+
+        function filterFlashcards(cat) {
+            document.querySelectorAll('.fc-filter-btn').forEach(btn => {
+                btn.classList.remove('bg-emerald-600', 'text-white');
+                btn.classList.add('bg-slate-100', 'dark:bg-slate-700', 'text-slate-600', 'dark:text-slate-300');
+            });
+            event.target.classList.add('bg-emerald-600', 'text-white');
+
+            if (cat === 'all') {
+                currentDeck = [...flashcardsData];
+            } else {
+                currentDeck = flashcardsData.filter(c => c.category === cat);
+            }
+            currentCardIndex = 0;
+            updateCardDisplay();
+        }
+
+        function shuffleFlashcards() {
+            for (let i = currentDeck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [currentDeck[i], currentDeck[j]] = [currentDeck[j], currentDeck[i]];
+            }
+            currentCardIndex = 0;
+            updateCardDisplay();
+        }
+
+        function markCardMastery(isMastered) {
+            const card = currentDeck[currentCardIndex];
+            if (isMastered) {
+                masteredCards.add(card.id);
+            } else {
+                masteredCards.delete(card.id);
+            }
+            updateMasteryProgress();
+            nextCard();
+        }
+
+        function updateMasteryProgress() {
+            const count = masteredCards.size;
+            const pct = (count / flashcardsData.length) * 100;
+            document.getElementById('flashcard-progress-bar').style.width = `${pct}%`;
+            document.getElementById('flashcard-progress-text').innerText = `${count}/${flashcardsData.length}`;
+        }
+
+        // --- QUIZ LOGIC ---
+        function renderQuizQuestion() {
+            const q = quizData[currentQuizIndex];
+            document.getElementById('quiz-current-num').innerText = currentQuizIndex + 1;
+            document.getElementById('quiz-total-num').innerText = quizData.length;
+            document.getElementById('quiz-question-box').innerText = q.question;
+
+            const optionsBox = document.getElementById('quiz-options-box');
+            optionsBox.innerHTML = '';
+
+            const explanationBox = document.getElementById('quiz-explanation-box');
+            explanationBox.classList.add('hidden');
+
+            const nextBtn = document.getElementById('quiz-next-btn');
+            nextBtn.classList.add('hidden');
+
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-sm font-medium flex items-center justify-between";
+                btn.innerHTML = `<span>${String.fromCharCode(65 + idx)}. ${opt}</span> <i class="quiz-icon fa-regular fa-circle text-slate-400"></i>`;
+                btn.onclick = () => selectQuizOption(idx);
+                optionsBox.appendChild(btn);
+            });
+        }
+
+        function selectQuizOption(optIdx) {
+            const q = quizData[currentQuizIndex];
+            const optionsBox = document.getElementById('quiz-options-box');
+            const buttons = optionsBox.querySelectorAll('button');
+
+            buttons.forEach(btn => btn.disabled = true);
+
+            const isCorrect = optIdx === q.answerIndex;
+            if (isCorrect) quizScore++;
+
+            buttons[optIdx].classList.remove('border-slate-200', 'dark:border-slate-700');
+            if (isCorrect) {
+                buttons[optIdx].classList.add('bg-emerald-50', 'dark:bg-emerald-900/30', 'border-emerald-500', 'text-emerald-800', 'dark:text-emerald-300');
+                buttons[optIdx].querySelector('.quiz-icon').className = "fa-solid fa-circle-check text-emerald-500";
+            } else {
+                buttons[optIdx].classList.add('bg-rose-50', 'dark:bg-rose-900/30', 'border-rose-500', 'text-rose-800', 'dark:text-rose-300');
+                buttons[optIdx].querySelector('.quiz-icon').className = "fa-solid fa-circle-xmark text-rose-500";
+                buttons[q.answerIndex].classList.add('bg-emerald-50', 'dark:bg-emerald-900/30', 'border-emerald-500', 'text-emerald-800', 'dark:text-emerald-300');
+            }
+
+            const expBox = document.getElementById('quiz-explanation-box');
+            expBox.innerHTML = `<strong>${isCorrect ? 'Correct!' : 'Incorrect.'}</strong> ${q.explanation}`;
+            expBox.className = `p-4 rounded-xl text-xs leading-relaxed border ${isCorrect ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 text-emerald-800 dark:text-emerald-200' : 'bg-rose-50 dark:bg-rose-900/20 border-rose-200 text-rose-800 dark:text-rose-200'}`;
+            expBox.classList.remove('hidden');
+
+            document.getElementById('quiz-next-btn').classList.remove('hidden');
+        }
+
+        function nextQuizQuestion() {
+            currentQuizIndex++;
+            if (currentQuizIndex < quizData.length) {
+                renderQuizQuestion();
+            } else {
+                showQuizResults();
+            }
+        }
+
+        function showQuizResults() {
+            document.getElementById('quiz-container').classList.add('hidden');
+            const resultsBox = document.getElementById('quiz-results-box');
+            resultsBox.classList.remove('hidden');
+
+            document.getElementById('quiz-final-score').innerText = `${quizScore} / ${quizData.length}`;
+            
+            const badge = document.getElementById('quiz-badge-text');
+            const feedback = document.getElementById('quiz-summary-feedback');
+
+            const scorePct = (quizScore / quizData.length) * 100;
+            if (scorePct >= 80) {
+                badge.innerText = "Mastery Level: PySpark & Neo4j Expert";
+                badge.className = "text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400";
+                feedback.innerText = "Excellent understanding of ALS matrix factorization, distributed PySpark parameters, and Neo4j Cypher path queries!";
+            } else {
+                badge.innerText = "Mastery Level: Developing Novice";
+                badge.className = "text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400";
+                feedback.innerText = "Revisit the flashcards on ALS optimization steps and Cypher path traversal clauses to consolidate your knowledge.";
+            }
+
+            const badgeHeader = document.getElementById('quiz-score-badge');
+            badgeHeader.innerText = `${scorePct}%`;
+            badgeHeader.className = scorePct >= 80 ? "font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300" : "font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-300";
+        }
+
+        function resetQuiz() {
+            currentQuizIndex = 0;
+            quizScore = 0;
+            document.getElementById('quiz-results-box').classList.add('hidden');
+            document.getElementById('quiz-container').classList.remove('hidden');
+            renderQuizQuestion();
+        }
+
+        // --- TOOL 1: ALS MATRIX FACTORIZATION CALCULATOR ---
+        function updateAlsCalculation() {
+            const u1 = parseFloat(document.getElementById('u1-slider').value);
+            const u2 = parseFloat(document.getElementById('u2-slider').value);
+            const u3 = parseFloat(document.getElementById('u3-slider').value);
+
+            const v1 = parseFloat(document.getElementById('v1-slider').value);
+            const v2 = parseFloat(document.getElementById('v2-slider').value);
+            const v3 = parseFloat(document.getElementById('v3-slider').value);
+
+            document.getElementById('u1-val').innerText = u1.toFixed(1);
+            document.getElementById('u2-val').innerText = u2.toFixed(1);
+            document.getElementById('u3-val').innerText = u3.toFixed(1);
+
+            document.getElementById('v1-val').innerText = v1.toFixed(1);
+            document.getElementById('v2-val').innerText = v2.toFixed(1);
+            document.getElementById('v3-val').innerText = v3.toFixed(1);
+
+            document.getElementById('u-vector-display').innerText = `[${u1.toFixed(1)}, ${u2.toFixed(1)}, ${u3.toFixed(1)}]`;
+            document.getElementById('v-vector-display').innerText = `[${v1.toFixed(1)}, ${v2.toFixed(1)}, ${v3.toFixed(1)}]`;
+
+            // Prediction dot product
+            const predicted = (u1 * v1) + (u2 * v2) + (u3 * v3);
+            const trueVal = parseFloat(document.getElementById('true-rating-input').value) || 0;
+            const sqError = Math.pow(trueVal - predicted, 2);
+
+            document.getElementById('predicted-rating-res').innerText = predicted.toFixed(2);
+            document.getElementById('squared-error-res').innerText = sqError.toFixed(2);
+        }
+
+        // --- TOOL 2: CYPHER RECOMMENDATION QUERY SIMULATOR ---
+        const cypherMockDatabase = {
+            "Toy Story (1995)": [
+                { title: "Star Wars: Episode IV - A New Hope (1977)", genres: "Action|Adventure|Fantasy|Sci-Fi", common: 401 },
+                { title: "Toy Story 2 (1999)", genres: "Animation|Children's|Comedy", common: 385 },
+                { title: "Raiders of the Lost Ark (1981)", genres: "Action|Adventure", common: 373 },
+                { title: "Star Wars: Episode V - The Empire Strikes Back (1980)", genres: "Action|Adventure|Drama|Sci-Fi|War", common: 346 },
+                { title: "Shawshank Redemption, The (1994)", genres: "Drama", common: 327 }
+            ],
+            "Star Wars: Episode IV - A New Hope (1977)": [
+                { title: "Star Wars: Episode V - The Empire Strikes Back (1980)", genres: "Action|Adventure|Drama|Sci-Fi|War", common: 686 },
+                { title: "Star Wars: Episode VI - Return of the Jedi (1983)", genres: "Action|Adventure|War|Sci-Fi", common: 590 },
+                { title: "Raiders of the Lost Ark (1981)", genres: "Action|Adventure", common: 540 },
+                { title: "Matrix, The (1999)", genres: "Action|Sci-Fi|Thriller", common: 480 },
+                { title: "Terminator 2: Judgment Day (1991)", genres: "Action|Sci-Fi|Thriller", common: 412 }
+            ],
+            "Jurassic Park (1993)": [
+                { title: "Terminator 2: Judgment Day (1991)", genres: "Action|Sci-Fi|Thriller", common: 430 },
+                { title: "Men in Black (1997)", genres: "Action|Adventure|Comedy|Sci-Fi", common: 398 },
+                { title: "Independence Day (ID4) (1996)", genres: "Action|Sci-Fi|War", common: 385 },
+                { title: "Star Wars: Episode IV - A New Hope (1977)", genres: "Action|Adventure|Sci-Fi", common: 370 },
+                { title: "Braveheart (1995)", genres: "Action|Drama|War", common: 345 }
+            ],
+            "Matrix, The (1999)": [
+                { title: "Star Wars: Episode IV - A New Hope (1977)", genres: "Action|Adventure|Sci-Fi", common: 480 },
+                { title: "Terminator 2: Judgment Day (1991)", genres: "Action|Sci-Fi|Thriller", common: 462 },
+                { title: "Fight Club (1999)", genres: "Drama", common: 420 },
+                { title: "American Beauty (1999)", genres: "Comedy|Drama", common: 395 },
+                { title: "Silence of the Lambs, The (1991)", genres: "Drama|Thriller", common: 380 }
+            ]
+        };
+
+        function runCypherSimulation() {
+            const movie = document.getElementById('cypher-seed-movie').value;
+            const ratingThresh = document.getElementById('cypher-rating-thresh').value;
+            const demoFilter = document.getElementById('cypher-demo-filter').value;
+
+            // Generate Cypher Query string dynamically
+            let whereConds = [
+                `m1.Title CONTAINS '${movie}'`,
+                `m2.Title <> '${movie}'`
+            ];
+
+            if (ratingThresh === "5") {
+                whereConds.push("r1.Rating = 5 AND r2.Rating = 5");
+            } else {
+                whereConds.push("r1.Rating >= 4 AND r2.Rating >= 4");
+            }
+
+            if (demoFilter === "M") whereConds.push("u.Gender = 'M'");
+            if (demoFilter === "F") whereConds.push("u.Gender = 'F'");
+            if (demoFilter === "YOUNG") whereConds.push("u.Age < 25");
+
+            const cypherQuery = `MATCH (m1:Movie)-[r1:RATED]->(u:User)-[r2:RATED]->(m2:Movie)
+WHERE ${whereConds.join('\n  AND ')}
+RETURN m2.Title, m2.Genres, count(DISTINCT u) AS common_users
+ORDER BY common_users DESC
+LIMIT 5`;
+
+            document.getElementById('cypher-code-preview').innerText = cypherQuery;
+
+            // Render simulated results table
+            const mockList = cypherMockDatabase[movie] || cypherMockDatabase["Toy Story (1995)"];
+            const mult = (demoFilter === "ALL") ? 1.0 : (demoFilter === "YOUNG" ? 0.35 : 0.55);
+
+            const tbody = document.getElementById('cypher-results-tbody');
+            tbody.innerHTML = '';
+
+            mockList.forEach((item, idx) => {
+                const adjCommon = Math.round(item.common * mult * (ratingThresh === "4" ? 1.4 : 1.0));
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors";
+                tr.innerHTML = `
+                    <td class="p-2.5 font-bold text-slate-400">${idx + 1}</td>
+                    <td class="p-2.5 text-emerald-600 dark:text-emerald-400 font-semibold">${item.title}</td>
+                    <td class="p-2.5 text-slate-500 text-[11px]">${item.genres}</td>
+                    <td class="p-2.5 text-right font-bold text-amber-500">${adjCommon}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // --- THEME & KEYBOARD LISTENERS ---
+        document.getElementById('theme-toggle').addEventListener('click', () => {
+            const isDark = document.documentElement.classList.toggle('dark');
+            document.getElementById('theme-toggle-icon').className = isDark ? "fa-solid fa-sun" : "fa-solid fa-moon";
+        });
+
+        document.addEventListener('keydown', (e) => {
+            const activeTab = document.querySelector('.tab-content:not(.hidden)').id;
+            if (activeTab === 'content-flashcards') {
+                if (e.code === 'Space') {
+                    e.preventDefault();
+                    flipCurrentCard();
+                } else if (e.code === 'ArrowRight') {
+                    nextCard();
+                } else if (e.code === 'ArrowLeft') {
+                    prevCard();
+                }
+            }
+        });
+
+        // Initialize state on load
+        window.addEventListener('DOMContentLoaded', () => {
+            updateCardDisplay();
+            renderQuizQuestion();
+            updateAlsCalculation();
+            runCypherSimulation();
+        });
+    </script>
+</body>
+</html>

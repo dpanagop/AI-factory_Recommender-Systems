@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lecture 6: Market Basket Analytics - Interactive Study Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#16a34a',
+                            600: '#15803d',
+                            700: '#15803d',
+                            900: '#14532d',
+                        },
+                        basket: {
+                            500: '#f97316',
+                            600: '#ea580c',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            options: {
+                ignoreHtmlClass: 'tex2jax_ignore',
+                processHtmlClass: 'tex2jax_process'
+            }
+        };
+    </script>
+    <!-- MathJax Library -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        .transform-style-3d {
+            transform-style: preserve-3d;
+        }
+        .backface-hidden {
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .dark ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-full flex flex-col font-sans transition-colors duration-200">
+
+    <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="p-2.5 bg-gradient-to-br from-orange-500 to-emerald-600 text-white rounded-xl shadow-md">
+                    <i class="fa-solid fa-basket-shopping text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+                        Market Basket Analytics
+                        <span class="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300">Lecture 6</span>
+                    </h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">
+                        AUEB AI Data Factory • Dr. Dimitrios Panagopoulos • <a href="https://dpanagopoulos.com/" target="_blank" class="text-emerald-600 dark:text-emerald-400 hover:underline">dpanagopoulos.com</a>
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-6 w-full md:w-auto justify-between md:justify-end">
+                <div class="flex items-center gap-4 text-xs">
+                    <div class="flex flex-col">
+                        <span class="text-slate-500 dark:text-slate-400 font-medium">Flashcards Mastered</span>
+                        <div class="flex items-center gap-2">
+                            <div class="w-24 bg-slate-200 dark:bg-slate-700 rounded-full h-2 overflow-hidden">
+                                <div id="flashcard-progress-bar" class="bg-emerald-500 h-full transition-all duration-300" style="width: 0%"></div>
+                            </div>
+                            <span id="flashcard-progress-text" class="font-bold text-slate-700 dark:text-slate-300">0/8</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="theme-toggle" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors" title="Toggle Theme">
+                    <i id="theme-toggle-icon" class="fa-solid fa-moon"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-slate-100 dark:border-slate-700/50">
+            <nav class="flex space-x-8 overflow-x-auto py-2 text-sm font-medium">
+                <button onclick="switchTab('lecture-summary')" id="tab-lecture-summary" class="tab-btn px-3 py-2 rounded-md text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-900/30 whitespace-nowrap flex items-center gap-2">
+                    <i class="fa-solid fa-book-open"></i> Key Concepts & Notes
+                </button>
+                <button onclick="switchTab('flashcards')" id="tab-flashcards" class="tab-btn px-3 py-2 rounded-md text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white whitespace-nowrap flex items-center gap-2">
+                    <i class="fa-solid fa-clone"></i> Flashcard Deck
+                </button>
+                <button onclick="switchTab('quiz')" id="tab-quiz" class="tab-btn px-3 py-2 rounded-md text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white whitespace-nowrap flex items-center gap-2">
+                    <i class="fa-solid fa-circle-question"></i> Knowledge Quiz
+                </button>
+                <button onclick="switchTab('lab')" id="tab-lab" class="tab-btn px-3 py-2 rounded-md text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white whitespace-nowrap flex items-center gap-2">
+                    <i class="fa-solid fa-calculator"></i> Association Rule Calculator & Lab
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <section id="content-lecture-summary" class="tab-content space-y-6">
+            <div class="bg-gradient-to-r from-slate-900 via-orange-950 to-slate-900 text-white rounded-2xl p-6 md:p-8 shadow-xl border border-orange-500/20">
+                <div class="max-w-3xl">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-orange-500/20 text-orange-300 border border-orange-500/30">
+                            Association Rule Mining
+                        </span>
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                            Apriori & FP-Growth
+                        </span>
+                    </div>
+                    <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight mb-2">
+                        Lecture 6: Market Basket Analytics
+                    </h2>
+                    <p class="text-slate-300 text-sm md:text-base leading-relaxed">
+                        Comprehensive study guide covering association rule learning, transaction support, confidence, lift, the Apriori algorithm, and FP-Growth tree optimization strictly based on Lecture 6 slides.
+                    </p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                <!-- Card 1 -->
+                <div class="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/50 text-orange-600 dark:text-orange-400 flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-cart-shopping text-lg"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">1. Market Basket Analysis Overview</h3>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
+                        Modeling technique based on the theory that if you buy a certain group of items, you are more likely to purchase another group of items (e.g., peanut butter and bread implies jelly).
+                    </p>
+                    <div class="bg-slate-50 dark:bg-slate-900/60 p-3 rounded-lg border border-slate-100 dark:border-slate-700/50 text-xs text-slate-600 dark:text-slate-400">
+                        <span><strong>Terminology:</strong> Association Rule Learning is general; Market Basket Analysis is retail-specific; Affinity Analysis is broader.</span>
+                    </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-square-root-variable text-lg"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">2. Itemsets & Transactions</h3>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-3">
+                        Let $I = \{i_1, \dots, i_n\}$ be a set of items. Subsets of $I$ are called itemsets.
+                    </p>
+                    <div class="p-2 bg-slate-50 dark:bg-slate-900/60 rounded-lg text-xs font-mono text-slate-800 dark:text-slate-200 overflow-x-auto mb-2 space-y-1">
+                        <div>$T = \{ (t_i, B_i) \mid t_i \in \mathbb{N}, B_i \subseteq I \}$</div>
+                        <div>Rule: $X \Rightarrow Y$ where $X, Y \subseteq I$</div>
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">
+                        Transactions $T$ represent customer purchases where baskets $B_i$ contain subsets of items.
+                    </p>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400 flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-chart-line text-lg"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">3. Support, Confidence & Lift</h3>
+                    <ul class="text-xs space-y-2 text-slate-600 dark:text-slate-400">
+                        <li>
+                            <strong class="text-slate-800 dark:text-slate-200">Support:</strong> Ratio of transactions containing $X$:
+                            $$\text{support}(X) = \frac{|\{t_i : X \subseteq B_i\}|}{|T|}$$
+                        </li>
+                        <li>
+                            <strong class="text-slate-800 dark:text-slate-200">Confidence:</strong> Probability of $Y$ given $X$:
+                            $$\text{conf}(X \Rightarrow Y) = \frac{\text{support}(X \cup Y)}{\text{support}(X)}$$
+                        </li>
+                        <li>
+                            <strong class="text-slate-800 dark:text-slate-200">Lift:</strong> Strength over independence:
+                            $$\text{lift}(X \Rightarrow Y) = \frac{\text{conf}(X \Rightarrow Y)}{\text{support}(Y)}$$
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Card 4 -->
+                <div class="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="w-10 h-10 rounded-lg bg-cyan-100 dark:bg-cyan-900/50 text-cyan-600 dark:text-cyan-400 flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-gears text-lg"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">4. The Apriori Algorithm</h3>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-3">
+                        Iteratively mines frequent itemsets by leveraging the <strong class="text-slate-800 dark:text-slate-200">Apriori property</strong>: if an itemset is frequent, all its subsets must also be frequent.
+                    </p>
+                    <ul class="text-xs space-y-1.5 text-slate-600 dark:text-slate-400">
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-check text-emerald-500 mt-0.5"></i>
+                            <span>Generate candidate itemsets $C_k$ from $L_{k-1}$.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-check text-emerald-500 mt-0.5"></i>
+                            <span>Filter by minimum support threshold to get $L_k$.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Card 5 -->
+                <div class="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-bolt text-lg"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">5. FP-Growth (Faster Mining)</h3>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-3">
+                        Addresses performance bottlenecks of Apriori by avoiding repeated database scans and candidate generation.
+                    </p>
+                    <ul class="text-xs space-y-1.5 text-slate-600 dark:text-slate-400">
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-check text-emerald-500 mt-0.5"></i>
+                            <span>Constructs a compact <strong class="text-slate-800 dark:text-slate-200">FP-Tree</strong> (Frequent Pattern Tree).</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-check text-emerald-500 mt-0.5"></i>
+                            <span>Uses divide-and-conquer conditional pattern bases.</span>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+        </section>
+
+        <section id="content-flashcards" class="tab-content hidden space-y-6">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                <div class="flex items-center gap-2 overflow-x-auto w-full sm:w-auto pb-2 sm:pb-0">
+                    <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider mr-2">Category:</span>
+                    <button onclick="filterFlashcards('all')" class="fc-filter-btn active text-xs px-3 py-1.5 rounded-full bg-emerald-600 text-white font-medium">All (8)</button>
+                    <button onclick="filterFlashcards('mba')" class="fc-filter-btn text-xs px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 font-medium">Market Basket & Metrics</button>
+                    <button onclick="filterFlashcards('algorithms')" class="fc-filter-btn text-xs px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 font-medium">Apriori & FP-Growth</button>
+                </div>
+                
+                <div class="flex items-center gap-2">
+                    <button onclick="shuffleFlashcards()" class="text-xs px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-1.5 transition-colors">
+                        <i class="fa-solid fa-shuffle"></i> Shuffle Deck
+                    </button>
+                </div>
+            </div>
+
+            <div class="max-w-xl mx-auto">
+                <div class="perspective-1000 h-80 w-full cursor-pointer group" onclick="flipCurrentCard()">
+                    <div id="flashcard-element" class="transform-style-3d transition-transform duration-500 relative w-full h-full rounded-2xl bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 shadow-xl p-8 flex flex-col justify-between">
+                        
+                        <!-- Front Face -->
+                        <div class="backface-hidden absolute inset-0 p-8 flex flex-col justify-between rounded-2xl bg-white dark:bg-slate-800">
+                            <div class="flex items-center justify-between">
+                                <span id="card-tag" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300">
+                                    Topic
+                                </span>
+                                <span class="text-xs text-slate-400 flex items-center gap-1">
+                                    <i class="fa-solid fa-rotate"></i> Click or press Space to flip
+                                </span>
+                            </div>
+                            <div class="my-auto text-center">
+                                <h3 id="card-question" class="text-xl font-bold text-slate-800 dark:text-white leading-snug">
+                                    Question Text
+                                </h3>
+                            </div>
+                            <div class="text-center text-xs text-slate-400">
+                                Card <span id="card-counter">1 / 8</span>
+                            </div>
+                        </div>
+
+                        <!-- Back Face -->
+                        <div class="backface-hidden rotate-y-180 absolute inset-0 p-8 flex flex-col justify-between rounded-2xl bg-slate-900 text-white border-2 border-emerald-500">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                                    Answer & Explanation
+                                </span>
+                                <span class="text-xs text-slate-400 flex items-center gap-1">
+                                    <i class="fa-solid fa-rotate"></i> Flip back
+                                </span>
+                            </div>
+                            <div class="my-auto text-left space-y-2 overflow-y-auto max-h-48 pr-2">
+                                <p id="card-answer" class="text-sm text-slate-200 leading-relaxed">
+                                    Answer Text
+                                </p>
+                            </div>
+                            <div id="card-source" class="text-xs text-emerald-300 italic border-t border-slate-800 pt-2">
+                                Slide Ref
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="mt-6 flex flex-col items-center gap-4">
+                    <div class="flex items-center gap-4">
+                        <button onclick="prevCard()" class="p-3 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 shadow-sm text-slate-700 dark:text-slate-200">
+                            <i class="fa-solid fa-arrow-left"></i>
+                        </button>
+                        
+                        <div class="flex gap-2">
+                            <button onclick="markCardMastery(false)" class="px-4 py-2 rounded-lg bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300 hover:bg-rose-200 font-medium text-xs flex items-center gap-1.5">
+                                <i class="fa-solid fa-xmark"></i> Needs Practice
+                            </button>
+                            <button onclick="markCardMastery(true)" class="px-4 py-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-200 font-medium text-xs flex items-center gap-1.5">
+                                <i class="fa-solid fa-check"></i> Mastered
+                            </button>
+                        </div>
+
+                        <button onclick="nextCard()" class="p-3 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 shadow-sm text-slate-700 dark:text-slate-200">
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+
+                    <p class="text-xs text-slate-400">Keyboard shortcuts: <kbd class="px-1.5 py-0.5 bg-slate-200 dark:bg-slate-700 rounded text-slate-700 dark:text-slate-300">Left/Right</kbd> to navigate, <kbd class="px-1.5 py-0.5 bg-slate-200 dark:bg-slate-700 rounded text-slate-700 dark:text-slate-300">Space</kbd> to flip.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="content-quiz" class="tab-content hidden space-y-6">
+            <div class="max-w-3xl mx-auto bg-white dark:bg-slate-800 rounded-2xl p-6 md:p-8 border border-slate-200 dark:border-slate-700 shadow-sm">
+                
+                <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-4 mb-6">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900 dark:text-white">Lecture 6 Mastery Quiz</h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Test your understanding of Association Rules, Support, Confidence, Lift, Apriori, and FP-Growth.</p>
+                    </div>
+                    <div id="quiz-timer" class="text-xs font-mono font-bold bg-slate-100 dark:bg-slate-700 px-3 py-1.5 rounded-lg text-slate-700 dark:text-slate-300">
+                        Question <span id="quiz-current-num">1</span> of <span id="quiz-total-num">5</span>
+                    </div>
+                </div>
+
+                <div id="quiz-container" class="space-y-6">
+                    <div id="quiz-question-box" class="text-base font-semibold text-slate-800 dark:text-white">
+                        Question loading...
+                    </div>
+
+                    <div id="quiz-options-box" class="space-y-3">
+                        <!-- Options injected dynamically -->
+                    </div>
+
+                    <div id="quiz-explanation-box" class="hidden p-4 rounded-xl text-sm leading-relaxed border">
+                        <!-- Explanation injected dynamically -->
+                    </div>
+
+                    <div class="flex justify-between items-center pt-4 border-t border-slate-100 dark:border-slate-700">
+                        <button id="quiz-reset-btn" onclick="resetQuiz()" class="text-xs text-slate-500 hover:text-slate-800 dark:hover:text-slate-200">
+                            <i class="fa-solid fa-rotate-right"></i> Restart Quiz
+                        </button>
+                        <button id="quiz-next-btn" onclick="nextQuizQuestion()" class="hidden px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium text-sm transition-colors">
+                            Next Question <i class="fa-solid fa-arrow-right ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="quiz-results-box" class="hidden text-center py-8 space-y-6">
+                    <div class="w-20 h-20 rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 mx-auto flex items-center justify-center text-3xl">
+                        <i class="fa-solid fa-award"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold text-slate-900 dark:text-white">Quiz Completed!</h3>
+                        <p class="text-slate-600 dark:text-slate-300 mt-1">
+                            Your Final Score: <span id="quiz-final-score" class="font-extrabold text-emerald-600 dark:text-emerald-400">0/5</span>
+                        </p>
+                        <p id="quiz-badge-text" class="text-xs font-semibold uppercase tracking-wider text-slate-500 mt-2"></p>
+                    </div>
+
+                    <div class="p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl max-w-md mx-auto text-xs text-slate-600 dark:text-slate-300 space-y-1 text-left">
+                        <strong class="block text-slate-800 dark:text-slate-100 mb-1">Key Takeaway:</strong>
+                        <p id="quiz-summary-feedback"></p>
+                    </div>
+
+                    <button onclick="resetQuiz()" class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-sm rounded-xl transition-colors">
+                        Retake Quiz
+                    </button>
+                </div>
+
+            </div>
+        </section>
+
+        <section id="content-lab" class="tab-content hidden space-y-6">
+            
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-6">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-700 pb-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                            <i class="fa-solid fa-calculator text-orange-500"></i> Tool 1: Association Rule Metrics Calculator ($Support, Confidence, Lift$)
+                        </h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">
+                            Calculate support, confidence, and lift for a rule $X \Rightarrow Y$ given transaction counts.
+                        </p>
+                    </div>
+                    <span class="px-3 py-1 bg-orange-100 dark:bg-orange-900/40 text-orange-800 dark:text-orange-300 font-mono text-xs rounded-full font-semibold">
+                        $\text{lift}(X \Rightarrow Y) = \frac{\text{conf}(X \Rightarrow Y)}{\text{support}(Y)}$
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+                    <div class="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl space-y-2 border border-slate-200 dark:border-slate-700">
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300">Total Transactions ($|T|$)</label>
+                        <input type="number" id="calc-total-t" value="1000" min="10" max="1000000" class="w-full p-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 font-mono font-bold" oninput="updateRuleMetrics()">
+                    </div>
+
+                    <div class="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl space-y-2 border border-slate-200 dark:border-slate-700">
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300">Transactions with $X$ ($count(X)$)</label>
+                        <input type="number" id="calc-count-x" value="200" min="1" max="100000" class="w-full p-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 font-mono font-bold" oninput="updateRuleMetrics()">
+                    </div>
+
+                    <div class="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl space-y-2 border border-slate-200 dark:border-slate-700">
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300">Transactions with $Y$ ($count(Y)$)</label>
+                        <input type="number" id="calc-count-y" value="150" min="1" max="100000" class="w-full p-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 font-mono font-bold" oninput="updateRuleMetrics()">
+                    </div>
+
+                    <div class="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl space-y-2 border border-slate-200 dark:border-slate-700">
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300">Transactions with $X \cup Y$</label>
+                        <input type="number" id="calc-count-xy" value="100" min="1" max="100000" class="w-full p-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 font-mono font-bold" oninput="updateRuleMetrics()">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="p-4 bg-slate-900 text-white rounded-xl space-y-1">
+                        <span class="text-xs text-slate-400">Support ($X \cup Y$)</span>
+                        <div id="res-support" class="text-2xl font-bold font-mono text-orange-400">10.0%</div>
+                        <p class="text-[11px] text-slate-400">Proportion of all transactions containing both $X$ and $Y$.</p>
+                    </div>
+
+                    <div class="p-4 bg-slate-900 text-white rounded-xl space-y-1">
+                        <span class="text-xs text-slate-400">Confidence ($X \Rightarrow Y$)</span>
+                        <div id="res-confidence" class="text-2xl font-bold font-mono text-emerald-400">50.0%</div>
+                        <p class="text-[11px] text-slate-400">Probability of $Y$ given that $X$ is present.</p>
+                    </div>
+
+                    <div class="p-4 bg-slate-900 text-white rounded-xl space-y-1">
+                        <span class="text-xs text-slate-400">Lift ($X \Rightarrow Y$)</span>
+                        <div id="res-lift" class="text-2xl font-bold font-mono text-cyan-400">3.33</div>
+                        <p class="text-[11px] text-slate-400">Lift > 1 indicates positive rule correlation.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-6">
+                <div class="border-b border-slate-200 dark:border-slate-700 pb-4">
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        <i class="fa-solid fa-bolt text-cyan-500"></i> Tool 2: Apriori Candidate Generation vs FP-Tree Simulator
+                    </h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">
+                        Compare candidate itemset explosion in Apriori versus compact tree compression in FP-Growth.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="p-5 bg-slate-50 dark:bg-slate-900/50 rounded-xl space-y-3 border border-slate-200 dark:border-slate-700">
+                        <h4 class="font-bold text-slate-900 dark:text-white text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-gears text-orange-500"></i> Apriori Algorithm Characteristics
+                        </h4>
+                        <ul class="text-xs space-y-2 text-slate-600 dark:text-slate-300">
+                            <li><strong class="text-slate-800 dark:text-slate-100">Approach:</strong> Level-wise iterative candidate generation ($C_k$ from $L_{k-1}$).</li>
+                            <li><strong class="text-slate-800 dark:text-slate-100">Database Scans:</strong> Requires multiple full scans of database for support counting.</li>
+                            <li><strong class="text-slate-800 dark:text-slate-100">Bottleneck:</strong> Generates massive candidate sets when minimum support is low.</li>
+                        </ul>
+                    </div>
+
+                    <div class="p-5 bg-slate-50 dark:bg-slate-900/50 rounded-xl space-y-3 border border-slate-200 dark:border-slate-700">
+                        <h4 class="font-bold text-slate-900 dark:text-white text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-tree text-emerald-500"></i> FP-Growth Algorithm Characteristics
+                        </h4>
+                        <ul class="text-xs space-y-2 text-slate-600 dark:text-slate-300">
+                            <li><strong class="text-slate-800 dark:text-slate-100">Approach:</strong> Divide-and-conquer frequent pattern tree construction.</li>
+                            <li><strong class="text-slate-800 dark:text-slate-100">Database Scans:</strong> Only 2 database scans required.</li>
+                            <li><strong class="text-slate-800 dark:text-slate-100">Advantage:</strong> Compresses transaction database into FP-Tree, avoiding candidate generation.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <footer class="bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 py-4 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500 dark:text-slate-400">
+            Market Basket Analytics Lecture 6 Study Guide • Association Rules • AI Data Factory (OPA AUEB)
+        </div>
+    </footer>
+
+    <script>
+        const flashcardsData = [
+            {
+                id: 1,
+                tag: "MBA Definition",
+                category: "mba",
+                question: "What is Market Basket Analysis (MBA)?",
+                answer: "A modeling technique based on the theory that if you buy a certain group of items, you are more likely to purchase another group of items (e.g., peanut butter and bread implies jelly).",
+                source: "Slide 3"
+            },
+            {
+                id: 2,
+                tag: "Terminology",
+                category: "mba",
+                question: "What is the relationship between Association Rule Learning, Market Basket Analysis, and Affinity Analysis?",
+                answer: "Association Rule Learning is the general methodology. Market Basket Analysis is a specific retail application, while Affinity Analysis is a broader application in non-retail contexts.",
+                source: "Slide 4"
+            },
+            {
+                id: 3,
+                tag: "Metrics",
+                category: "mba",
+                question: "How is the Support of an itemset X defined mathematically?",
+                answer: "Support of X is the ratio of transactions where X is a subset of the basket divided by the total number of transactions: support(X) = |{t_i : X ⊆ B_i}| / |T|.",
+                source: "Slide 7"
+            },
+            {
+                id: 4,
+                tag: "Metrics",
+                category: "mba",
+                question: "How is the Confidence of a rule X => Y calculated?",
+                answer: "Confidence is the support of X ∪ Y divided by the support of X: conf(X => Y) = support(X ∪ Y) / support(X).",
+                source: "Slide 7"
+            },
+            {
+                id: 5,
+                tag: "Metrics",
+                category: "mba",
+                question: "What does the Lift metric of a rule X => Y measure?",
+                answer: "Lift is the confidence of the rule divided by the support of Y: lift(X => Y) = conf(X => Y) / support(Y). A lift greater than 1 indicates positive correlation.",
+                source: "Slide 7"
+            },
+            {
+                id: 6,
+                tag: "Apriori Property",
+                category: "algorithms",
+                question: "What is the 'Apriori property' used in candidate generation?",
+                answer: "If an itemset is frequent, all of its subsets must also be frequent. Conversely, if an itemset is infrequent, all its supersets will be infrequent.",
+                source: "Slide 9"
+            },
+            {
+                id: 7,
+                tag: "Apriori Steps",
+                category: "algorithms",
+                question: "What are the high-level steps of the Apriori algorithm?",
+                answer: "1. Generate candidate itemsets C1. 2. Find frequent 1-itemsets L1. 3. Generate candidate itemsets Ck from Lk-1. 4. Find frequent k-itemsets Lk. 5. Repeat until no new itemsets appear and generate association rules.",
+                source: "Slide 9"
+            },
+            {
+                id: 8,
+                tag: "FP-Growth",
+                category: "algorithms",
+                question: "Why is FP-Growth faster than Apriori?",
+                answer: "FP-Growth avoids candidate generation and repeated database scans by constructing a compact data structure called an FP-Tree (Frequent Pattern Tree) and mining frequent itemsets directly.",
+                source: "Slide 10"
+            }
+        ];
+
+        const quizData = [
+            {
+                question: "What does the Support metric represent in Market Basket Analytics?",
+                options: [
+                    "The probability of purchasing Y given X",
+                    "The proportion of transactions in the dataset that contain the itemset X",
+                    "The ratio of customer complaints to total sales",
+                    "The price markup of items in basket B"
+                ],
+                answerIndex: 1,
+                explanation: "Support(X) measures how frequently itemset X appears across all transactions in the dataset."
+            },
+            {
+                question: "If the confidence of rule X => Y is 0.75, what does that mean?",
+                options: [
+                    "75% of all transactions contain both X and Y",
+                    "75% of customers who purchase X also purchase Y",
+                    "The price of Y is 75% higher when bought with X",
+                    "There is a 75% chance that X is independent of Y"
+                ],
+                answerIndex: 1,
+                explanation: "Confidence represents the conditional probability P(Y | X), meaning 75% of transactions containing X also contain Y."
+            },
+            {
+                question: "What is the primary advantage of the FP-Growth algorithm over Apriori?",
+                options: [
+                    "It requires no user-defined thresholds",
+                    "It eliminates candidate generation and reduces database scans to just two",
+                    "It works exclusively on numerical data without transaction logs",
+                    "It guarantees 100% precision for association rules"
+                ],
+                answerIndex: 1,
+                explanation: "FP-Growth constructs an FP-Tree, avoiding the costly candidate generation step and multiple database scans required by Apriori."
+            },
+            {
+                question: "What does a Lift value of 1.0 signify for an association rule X => Y?",
+                options: [
+                    "X and Y occur together much more often than expected",
+                    "X and Y are perfectly correlated",
+                    "X and Y are independent (no rule correlation)",
+                    "Y always occurs whenever X occurs"
+                ],
+                answerIndex: 2,
+                explanation: "A lift of 1 indicates that the occurrence of X and Y is independent; lift > 1 shows positive association."
+            },
+            {
+                question: "According to the Apriori property, if an itemset is found to be infrequent, what can be deduced about its supersets?",
+                options: [
+                    "All of its supersets are guaranteed to be frequent",
+                    "All of its supersets will also be infrequent and can be safely pruned",
+                    "Its supersets must be recalculated using full database scans",
+                    "Supersets are unaffected by subset frequency"
+                ],
+                answerIndex: 1,
+                explanation: "The Apriori property states that if an itemset is infrequent, all of its supersets must also be infrequent, allowing massive pruning during candidate generation."
+            }
+        ];
+
+        let currentDeck = [...flashcardsData];
+        let currentCardIndex = 0;
+        let isCardFlipped = false;
+        let masteredCards = new Set();
+
+        let currentQuizIndex = 0;
+        let quizScore = 0;
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('text-emerald-700', 'dark:text-emerald-300', 'bg-emerald-50', 'dark:bg-emerald-900/30');
+                el.classList.add('text-slate-600', 'dark:text-slate-400');
+            });
+
+            document.getElementById(`content-${tabId}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`tab-${tabId}`);
+            activeBtn.classList.add('text-emerald-700', 'dark:text-emerald-300', 'bg-emerald-50', 'dark:bg-emerald-900/30');
+            activeBtn.classList.remove('text-slate-600', 'dark:text-slate-400');
+        }
+
+        function updateCardDisplay() {
+            if (currentDeck.length === 0) return;
+            const card = currentDeck[currentCardIndex];
+            
+            const cardEl = document.getElementById('flashcard-element');
+            cardEl.classList.remove('rotate-y-180');
+            isCardFlipped = false;
+
+            setTimeout(() => {
+                document.getElementById('card-tag').innerText = card.tag;
+                document.getElementById('card-question').innerText = card.question;
+                document.getElementById('card-answer').innerText = card.answer;
+                document.getElementById('card-source').innerText = `Source: ${card.source}`;
+                document.getElementById('card-counter').innerText = `${currentCardIndex + 1} / ${currentDeck.length}`;
+            }, 150);
+        }
+
+        function flipCurrentCard() {
+            const cardEl = document.getElementById('flashcard-element');
+            isCardFlipped = !isCardFlipped;
+            if (isCardFlipped) {
+                cardEl.classList.add('rotate-y-180');
+            } else {
+                cardEl.classList.remove('rotate-y-180');
+            }
+        }
+
+        function nextCard() {
+            if (currentDeck.length === 0) return;
+            currentCardIndex = (currentCardIndex + 1) % currentDeck.length;
+            updateCardDisplay();
+        }
+
+        function prevCard() {
+            if (currentDeck.length === 0) return;
+            currentCardIndex = (currentCardIndex - 1 + currentDeck.length) % currentDeck.length;
+            updateCardDisplay();
+        }
+
+        function filterFlashcards(cat) {
+            document.querySelectorAll('.fc-filter-btn').forEach(btn => {
+                btn.classList.remove('bg-emerald-600', 'text-white');
+                btn.classList.add('bg-slate-100', 'dark:bg-slate-700', 'text-slate-600', 'dark:text-slate-300');
+            });
+            event.target.classList.add('bg-emerald-600', 'text-white');
+
+            if (cat === 'all') {
+                currentDeck = [...flashcardsData];
+            } else {
+                currentDeck = flashcardsData.filter(c => c.category === cat);
+            }
+            currentCardIndex = 0;
+            updateCardDisplay();
+        }
+
+        function shuffleFlashcards() {
+            for (let i = currentDeck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [currentDeck[i], currentDeck[j]] = [currentDeck[j], currentDeck[i]];
+            }
+            currentCardIndex = 0;
+            updateCardDisplay();
+        }
+
+        function markCardMastery(isMastered) {
+            const card = currentDeck[currentCardIndex];
+            if (isMastered) {
+                masteredCards.add(card.id);
+            } else {
+                masteredCards.delete(card.id);
+            }
+            updateMasteryProgress();
+            nextCard();
+        }
+
+        function updateMasteryProgress() {
+            const count = masteredCards.size;
+            const pct = (count / flashcardsData.length) * 100;
+            document.getElementById('flashcard-progress-bar').style.width = `${pct}%`;
+            document.getElementById('flashcard-progress-text').innerText = `${count}/${flashcardsData.length}`;
+        }
+
+        function renderQuizQuestion() {
+            const q = quizData[currentQuizIndex];
+            document.getElementById('quiz-current-num').innerText = currentQuizIndex + 1;
+            document.getElementById('quiz-total-num').innerText = quizData.length;
+            document.getElementById('quiz-question-box').innerText = q.question;
+
+            const optionsBox = document.getElementById('quiz-options-box');
+            optionsBox.innerHTML = '';
+
+            const explanationBox = document.getElementById('quiz-explanation-box');
+            explanationBox.classList.add('hidden');
+
+            const nextBtn = document.getElementById('quiz-next-btn');
+            nextBtn.classList.add('hidden');
+
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-sm font-medium flex items-center justify-between";
+                btn.innerHTML = `<span>${String.fromCharCode(65 + idx)}. ${opt}</span> <i class="quiz-icon fa-regular fa-circle text-slate-400"></i>`;
+                btn.onclick = () => selectQuizOption(idx);
+                optionsBox.appendChild(btn);
+            });
+        }
+
+        function selectQuizOption(optIdx) {
+            const q = quizData[currentQuizIndex];
+            const optionsBox = document.getElementById('quiz-options-box');
+            const buttons = optionsBox.querySelectorAll('button');
+
+            buttons.forEach(btn => btn.disabled = true);
+
+            const isCorrect = optIdx === q.answerIndex;
+            if (isCorrect) quizScore++;
+
+            buttons[optIdx].classList.remove('border-slate-200', 'dark:border-slate-700');
+            if (isCorrect) {
+                buttons[optIdx].classList.add('bg-emerald-50', 'dark:bg-emerald-900/30', 'border-emerald-500', 'text-emerald-800', 'dark:text-emerald-300');
+                buttons[optIdx].querySelector('.quiz-icon').className = "fa-solid fa-circle-check text-emerald-500";
+            } else {
+                buttons[optIdx].classList.add('bg-rose-50', 'dark:bg-rose-900/30', 'border-rose-500', 'text-rose-800', 'dark:text-rose-300');
+                buttons[optIdx].querySelector('.quiz-icon').className = "fa-solid fa-circle-xmark text-rose-500";
+                buttons[q.answerIndex].classList.add('bg-emerald-50', 'dark:bg-emerald-900/30', 'border-emerald-500', 'text-emerald-800', 'dark:text-emerald-300');
+            }
+
+            const expBox = document.getElementById('quiz-explanation-box');
+            expBox.innerHTML = `<strong>${isCorrect ? 'Correct!' : 'Incorrect.'}</strong> ${q.explanation}`;
+            expBox.className = `p-4 rounded-xl text-xs leading-relaxed border ${isCorrect ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 text-emerald-800 dark:text-emerald-200' : 'bg-rose-50 dark:bg-rose-900/20 border-rose-200 text-rose-800 dark:text-rose-200'}`;
+            expBox.classList.remove('hidden');
+
+            document.getElementById('quiz-next-btn').classList.remove('hidden');
+        }
+
+        function nextQuizQuestion() {
+            currentQuizIndex++;
+            if (currentQuizIndex < quizData.length) {
+                renderQuizQuestion();
+            } else {
+                showQuizResults();
+            }
+        }
+
+        function showQuizResults() {
+            document.getElementById('quiz-container').classList.add('hidden');
+            const resultsBox = document.getElementById('quiz-results-box');
+            resultsBox.classList.remove('hidden');
+
+            document.getElementById('quiz-final-score').innerText = `${quizScore} / ${quizData.length}`;
+            
+            const badge = document.getElementById('quiz-badge-text');
+            const feedback = document.getElementById('quiz-summary-feedback');
+
+            const scorePct = (quizScore / quizData.length) * 100;
+            if (scorePct >= 80) {
+                badge.innerText = "Mastery Level: Association Rule Expert";
+                badge.className = "text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400";
+                feedback.innerText = "Outstanding comprehension of support, confidence, lift, Apriori, and FP-Growth!";
+            } else {
+                badge.innerText = "Mastery Level: Developing Novice";
+                badge.className = "text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400";
+                feedback.innerText = "Review the flashcards on support, confidence calculations, and FP-Growth tree mechanics.";
+            }
+        }
+
+        function resetQuiz() {
+            currentQuizIndex = 0;
+            quizScore = 0;
+            document.getElementById('quiz-results-box').classList.add('hidden');
+            document.getElementById('quiz-container').classList.remove('hidden');
+            renderQuizQuestion();
+        }
+
+        function updateRuleMetrics() {
+            const totalT = parseFloat(document.getElementById('calc-total-t').value) || 1;
+            const countX = parseFloat(document.getElementById('calc-count-x').value) || 0;
+            const countY = parseFloat(document.getElementById('calc-count-y').value) || 0;
+            const countXY = parseFloat(document.getElementById('calc-count-xy').value) || 0;
+
+            const supportXY = countXY / totalT;
+            const supportX = countX / totalT;
+            const supportY = countY / totalT;
+
+            const confidence = supportX > 0 ? supportXY / supportX : 0;
+            const lift = supportY > 0 ? confidence / supportY : 0;
+
+            document.getElementById('res-support').innerText = (supportXY * 100).toFixed(1) + '%';
+            document.getElementById('res-confidence').innerText = (confidence * 100).toFixed(1) + '%';
+            document.getElementById('res-lift').innerText = lift.toFixed(2);
+        }
+
+        document.getElementById('theme-toggle').addEventListener('click', () => {
+            const isDark = document.documentElement.classList.toggle('dark');
+            document.getElementById('theme-toggle-icon').className = isDark ? "fa-solid fa-sun" : "fa-solid fa-moon";
+        });
+
+        document.addEventListener('keydown', (e) => {
+            const activeTab = document.querySelector('.tab-content:not(.hidden)').id;
+            if (activeTab === 'content-flashcards') {
+                if (e.code === 'Space') {
+                    e.preventDefault();
+                    flipCurrentCard();
+                } else if (e.code === 'ArrowRight') {
+                    nextCard();
+                } else if (e.code === 'ArrowLeft') {
+                    prevCard();
+                }
+            }
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            updateCardDisplay();
+            renderQuizQuestion();
+            updateRuleMetrics();
+        });
+    </script>
+</body>
+</html>
